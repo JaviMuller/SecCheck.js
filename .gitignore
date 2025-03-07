@@ -1,0 +1,14 @@
+# VSCode Files
+.vscode
+**/*.code-workspace
+
+# MacOS Files
+.DS_Store
+
+# OCaml Generated Files
+_build/
+_coverage/
+*.coverage
+
+# Local Opam switch
+_opam/

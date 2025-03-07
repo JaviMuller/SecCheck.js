@@ -1,0 +1,9 @@
+(include_subdirs unqualified)
+
+(library
+ (public_name trusted-cpg.base)
+ (name TcpgBase)
+ (modules base cont font log io string terminal)
+ (libraries fmt prelude unix)
+ (instrumentation
+  (backend bisect_ppx)))

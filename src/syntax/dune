@@ -1,0 +1,11 @@
+(include_subdirs unqualified)
+
+(library
+  (public_name trusted-cpg.syntax)
+  (name TcpgSyntax)
+  (libraries TcpgBase fmt prelude)
+  (modules
+    ; share
+    source
+    ; core
+    formula))

@@ -1,0 +1,4 @@
+(executable
+ (public_name trusted-cpg)
+ (name main)
+ (libraries trusted_cpg))

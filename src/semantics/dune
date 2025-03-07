@@ -1,0 +1,23 @@
+(include_subdirs unqualified)
+
+(library
+  (public_name trusted-cpg.lib)
+  (name TcpgSemantics)
+  (modules
+    ; core parsers
+    lexer
+    parser
+    parsing
+    ; utils
+    re
+    code_utils
+    parsing_utils
+    string_utils)
+  (preprocess
+    (staged_pps ppx_import ppx_deriving.std))
+  (libraries
+    TcpgBase
+    TcpgSyntax
+    prelude
+    menhirLib
+    str))
