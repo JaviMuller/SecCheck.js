@@ -26,7 +26,7 @@
 
 (* ========== Classical Logic Tokens ========== *)
 
-%token QEXISTS
+%token QEXISTS QFORALL
 %token LNOT
 %token LAND LOR
 %token LIMPLIES LBICONDIMPL
@@ -59,27 +59,31 @@ entry_formula_target
 let entry_formula_target := ~ = formula_target; EOF; <>
 
 let formula_target :=
-(*  | EXISTS; vars = separated_list(COMMA, id_target); DOT; formula = ltl_formula_target; EOF;
-    { Formula.ECreate (vars, formula) @> at $sloc } *)
-    | ~ = ltl_formula_target; <>
+  | QEXISTS; vars = separated_list(COMMA, id_target); DOT; f = formula_target;
+    { Formula.Exists (vars, f) }
+  | QFORALL; vars = separated_list(COMMA, id_target); DOT; f = formula_target;
+    { Formula.Forall (vars, f) }
+  // | ~ = ltl_formula_target; <> -- When passing to ltl, we only need to consider prenex existential formulas
 
-let ltl_formula_target :=
-  (*| LPAREN; ~ = ltl_formula_target; RPAREN; <> *)
+// let ltl_formula_target :=
+  | LPAREN; ~ = formula_target; RPAREN; <>
   | TRUE;
     { Formula.True }
   | FALSE;
     { Formula.False }
-  (* | name = id_target; LPAREN; arg = id_target; RPAREN;
-    { fFormula.Predicate (name, arg) @> at $sloc }
-  | LNOT; formula = ltl_formula_target;
-    { Formula.Not (formula) @> at $sloc }
-  | f1 = ltl_formula_target; LAND; f2 = ltl_formula_target;
-    { Formula.And (f1, f2) @> at $sloc }
-  | f1 = ltl_formula_target; LOR; f2 = ltl_formula_target;
-    { Formula.Or (f1, f2) @> at $sloc }
-  | f1 = ltl_formula_target; LIMPLIES; f2 = ltl_formula_target;
-    { Formula.Implication (f1, f2) @> at $sloc }
-  | f1 = ltl_formula_target; LBICONDIMPL; f2 = ltl_formula_target;
-    { Formula.BicondImplication (f1, f2) @> at $sloc }
-  | NEXT; f = ltl_formula_target;
-    { Formula.Next (f) @> at $sloc } *)
+  // | name = id_target; LPAREN; arg = id_target; RPAREN;
+  //   { Formula.Predicate (name, arg) }
+  | name = id_target;
+    { Formula.Variable (name) }
+  | LNOT; f = formula_target;
+    { Formula.Not (f) }
+  | f1 = formula_target; LAND; f2 = formula_target;
+    { Formula.And (f1, f2) }
+  | f1 = formula_target; LOR; f2 = formula_target;
+    { Formula.Or (f1, f2) }
+  | f1 = formula_target; LIMPLIES; f2 = formula_target;
+    { Formula.Implication (f1, f2) }
+  | f1 = formula_target; LBICONDIMPL; f2 = formula_target;
+    { Formula.BicondImplication (f1, f2) }
+  
+let id_target := x = ID; { x }

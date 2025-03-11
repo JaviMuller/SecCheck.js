@@ -4,47 +4,6 @@
   open Lexing
   open Parser
 
-  let keywords = Hashtbl.of_seq @@ List.to_seq
-          [
-            (* Language values *)
-            "True"         , TRUE;
-            "False"        , FALSE;
-            
-            (* Quantifier operators *)
-            "exists"       , QEXISTS;
-            "∃"            , QEXISTS;
-            (* "forall"       , qforall;
-            "∀"            , qforall; *)
-
-            (* Classical logical operators *)
-            "¬"            , LNOT;
-            "~"            , LNOT;
-            "∧"            , LAND;
-            "&"            , LAND;
-            "∨"            , LOR;
-            "|"            , LOR;
-            "→"            , LIMPLIES;
-            "->"           , LIMPLIES;
-            "↔"            , LBICONDIMPL;
-            "<->"          , LBICONDIMPL;
-
-            (* LTL operators *)
-            "X"            , NEXT;
-            "○"            , NEXT;
-            "F"            , EVENTUALLY;
-            "◊"            , EVENTUALLY;
-            "G"            , ALWAYS;
-            "□"            , ALWAYS;
-            "U"            , UNTIL;
-            "𝒰"            , UNTIL;
-            "W"            , WEAKUNTIL;
-            "𝒲"            , WEAKUNTIL;
-
-            (* CTL operators *)
-            (*"E"            , CTLEXISTS;*)
-            (*"A"            , CTLALL;*)
-          ]
-
   exception Syntax_error of string
 
   let create_string (lexbuf : Lexing.lexbuf) (read_string : Lexing.lexbuf -> token) : token =
@@ -77,20 +36,43 @@ let newline      = '\r' | '\n' | "\r\n"
 
 rule read =
   parse
-  | white            { read lexbuf }
-  | newline          { new_line lexbuf; read lexbuf }
-  | ','              { COMMA }
-  | '.'              { DOT }
-  | '('              { LPAREN }
-  | ')'              { RPAREN }
-  | '['              { LBRACK }
-  | ']'              { RBRACK }
-  | '='              { DEFEQ }
-  | id as x          { try Hashtbl.find keywords x with Not_found -> ID x }
-  | "//"             { read_line_comment lexbuf }
-  | "/*"             { read_block_comment lexbuf }
-  | _                { raise (create_syntax_error "Unexpected char" lexbuf) }
-  | eof              { EOF }
+  | white                        { read lexbuf }
+  | newline                      { new_line lexbuf; read lexbuf }
+  | ','                          { COMMA }
+  | '.'                          { DOT }
+  | '('                          { LPAREN }
+  | ')'                          { RPAREN }
+  | "True"                       { TRUE }
+  | '\xE2' '\x8A' '\xA4'         { TRUE }
+  | "False"                      { FALSE}
+  | '\x22' '\xA5'                { FALSE }
+  | '\xE2' '\x88' '\x83'         { QEXISTS }
+  | '\xE2' '\x88' '\xA4'         { QFORALL }
+  | '\xC2' '\xAC'                { LNOT }
+  | '!'                          { LNOT }
+  | '\xE2' '\x88' '\xA7'         { LAND }
+  | '&'                          { LAND }
+  | '\xE2' '\x88' '\xA8'         { LOR }
+  | '|'                          { LOR }
+  | 'X'                          { NEXT }
+  | '\xE2' '\x97' '\x8B'         { NEXT }
+  | 'F'                          { EVENTUALLY }
+  | '\xE2' '\x97' '\x8A'         { EVENTUALLY }
+  | 'G'                          { ALWAYS }
+  | '\xE2' '\x96' '\xA1'         { ALWAYS }
+  | 'U'                          { UNTIL }
+  | '\xF0' '\x9D' '\x92' '\xB0'  { UNTIL }
+  | 'W'                          { WEAKUNTIL }
+  | '\xF0' '\x9D' '\x92' '\xB2'  { WEAKUNTIL }
+  | "->"                         { LIMPLIES }
+  | "<->"                        { LBICONDIMPL }
+  | "exists"                     { QEXISTS }
+  | "forall"                     { QFORALL }
+  | id as x                      { ID x }
+  | "//"                         { read_line_comment lexbuf }
+  | "/*"                         { read_block_comment lexbuf }
+  | _                            { raise (create_syntax_error "Unexpected char" lexbuf) }
+  | eof                          { EOF }
 
 
 (* ========== String reader ========== *)
