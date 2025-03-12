@@ -1,0 +1,3 @@
+Exists c, v : Eventually (
+                GDPR_Sensitive(c, v) /\
+                Next (Always (~ GDPR_Delete(c,v))))

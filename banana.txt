@@ -1,1 +1,0 @@
-exists x, y, z . (x & (forall w . y -> w)) | y -> !z

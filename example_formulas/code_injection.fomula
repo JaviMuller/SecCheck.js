@@ -1,0 +1,3 @@
+Exists f, arg : .tainted(arg) /\
+                .injection_sink(f) /\
+                Eventually (f(targ))

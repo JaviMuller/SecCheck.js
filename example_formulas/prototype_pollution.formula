@@ -1,0 +1,4 @@
+Exists o1, o2, p1, p2, v :
+    .tainted(p1) /\ .tainted(p2) /\ .tainted(v) /\
+    Eventually (o2 := o1[p1] /\
+        Next Eventually (o2[p2] := v))

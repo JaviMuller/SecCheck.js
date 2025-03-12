@@ -8,4 +8,7 @@
     ; share
     source
     ; core
+    value
+    expr
+    binrelop
     formula))
