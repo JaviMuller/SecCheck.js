@@ -6,12 +6,7 @@
 
   let keywords = Hashtbl.of_seq @@ List.to_seq
     [
-      "Exists"                 , QEXISTS;
-      "Forall"                 , QFORALL;
-      "Next"                   , NEXT;
-      "Eventually"             , EVENTUALLY;
-      "Always"                 , ALWAYS;
-      "tainted"                , TAINTED;
+        "Prop"                   , PROP;
     ]
           
 
@@ -60,35 +55,11 @@ rule read =
   | newline                      { new_line lexbuf; read lexbuf }
   | ','                          { COMMA }
   | '.'                          { DOT }
+  | ';'                          { SEMICOLON }
   | '('                          { LPAREN }
   | ')'                          { RPAREN }
-  (* Logic-associated symbols *)
-  | "True"                       { TRUE }
-  | '\xE2' '\x8A' '\xA4'         { TRUE }
-  | "False"                      { FALSE}
-  | '\x22' '\xA5'                { FALSE }
-  | '\xE2' '\x88' '\x83'         { QEXISTS }
-  | '\xE2' '\x88' '\xA4'         { QFORALL }
-  | '\xC2' '\xAC'                { LNOT }
-  | '~'                          { LNOT }
-  | '\xE2' '\x88' '\xA7'         { LAND }
-  | '&'                          { LAND }
-  | "/\\"                        { LAND }
-  | '\xE2' '\x88' '\xA8'         { LOR }
-  | '|'                          { LOR }
-  | "\\/"                        { LOR }
-  | 'X'                          { NEXT }
-  | '\xE2' '\x97' '\x8B'         { NEXT }
-  | 'F'                          { EVENTUALLY }
-  | '\xE2' '\x97' '\x8A'         { EVENTUALLY }
-  | 'G'                          { ALWAYS }
-  | '\xE2' '\x96' '\xA1'         { ALWAYS }
-  | 'U'                          { UNTIL }
-  | '\xF0' '\x9D' '\x92' '\xB0'  { UNTIL }
-  | 'W'                          { WEAKUNTIL }
-  | '\xF0' '\x9D' '\x92' '\xB2'  { WEAKUNTIL }
-  | "->"                         { LIMPLIES }
-  | "<->"                        { LEQUIV }
+  | '{'                          { LBRACE }
+  | '}'                          { RBRACE }
   (* Abstraction symbols *)
   | bool                         { BOOL (bool_of_string @@ Lexing.lexeme lexbuf) }
   | int                          { INT (int_of_string @@ Lexing.lexeme lexbuf) }
@@ -103,7 +74,6 @@ rule read =
   | ">"                          { GT }
   | ">="                         { GEQ }
   | ":="                         { DEFEQ }
-  | ':'                          { COLON }
   | id as x                      { try Hashtbl.find keywords x with Not_found -> ID x }
   | "//"                         { read_line_comment lexbuf }
   | "/*"                         { read_block_comment lexbuf }

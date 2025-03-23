@@ -11,4 +11,6 @@
     value
     expr
     binrelop
-    formula))
+    predicate
+    trace
+    security))

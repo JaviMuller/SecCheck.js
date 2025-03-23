@@ -1,0 +1,8 @@
+Prop PrototypePollution(o1, o2, p1, p2, v) {
+  .tainted(p1),
+  .tainted(p2),
+  .tainted(v)
+  ;
+  o2 := o1[p1],
+  o2[p2] := v
+}

@@ -28,7 +28,7 @@ let lexer (last_token : token ref) (lexbuf : Lexing.lexbuf) =
   last_token := token;
   token
 
-let parser (start : 'a start) (lexbuf : Lexing.lexbuf) : Formula.t =
+let parser (start : 'a start) (lexbuf : Lexing.lexbuf) : Security.t =
   let module Core_TCPGMI = Parser.MenhirInterpreter in
   let last_token = ref Parser.EOF in
   Core_TCPGMI.loop_handle
@@ -43,10 +43,10 @@ let parser (start : 'a start) (lexbuf : Lexing.lexbuf) : Formula.t =
     (Core_TCPGMI.lexer_lexbuf_to_supplier (lexer last_token) lexbuf)
     (start lexbuf.Lexing.lex_curr_p)
 
-let parse_formula (str : string) : Formula.t =
+let parse_security_property (str : string) : Security.t =
   let lexbuf = init_lexbuf "" str in
-  Parser.entry_formula_target Lexer.read lexbuf
+  Parser.entry_sec_prop_target Lexer.read lexbuf
   
-let parse_formula_from_file (fname : string) : Formula.t =
+let parse_security_property_from_file (fname : string) : Security.t =
   let str = Code_utils.load_file_contents fname in
-  parse_formula str
+  parse_security_property str

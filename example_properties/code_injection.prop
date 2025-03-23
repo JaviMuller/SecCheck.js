@@ -1,0 +1,6 @@
+Prop CodeInjection(f, arg) {
+  .tainted(arg),
+  .injection_sink(f)
+  ;
+  f(arg)
+}
