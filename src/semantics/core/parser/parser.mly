@@ -18,6 +18,7 @@
 (* ========== General Symbol Tokens ========== *)
 
 %token COMMA DOT SEMICOLON
+%token UNDERSCORE THREEDOTS
 %token LPAREN RPAREN
 %token EOF
 
@@ -59,6 +60,10 @@ let trace_target :=
   | ~ = relop_target; <>
   | func = id_target; LPAREN; args = separated_list(COMMA, expression_target); RPAREN;
     { Trace.FuncCall (func, args) }
+  | func = id_target; LPAREN; THREEDOTS; arg = id_target; RPAREN;
+    { Trace.FuncCallWithArg(func, arg) }
+  | func = id_target; LPAREN; THREEDOTS; RPAREN;
+    { Trace.FuncCallAnyArgs func }
   (* TODO: Right now it is <expr>[<expr>]=<expr>. Will it only be <var>[<expr>]=<expr>? *)
   | obj = expression_target; LBRACK; prop = expression_target; RBRACK; DEFEQ; v = expression_target;
     { Trace.PropAssign (obj, prop, v) }
@@ -81,6 +86,8 @@ let relop_target :=
 
 let expression_target :=
   | LPAREN; ~ = expression_target; RPAREN; <>
+  | UNDERSCORE;
+    { Expr.UnnamedVar }
   | x = id_target;
     { Expr.Var x }
   | c = val_target;

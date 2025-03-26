@@ -37,7 +37,7 @@ let frac          = '.' digit*
 let exp           = ['e' 'E'] ['-' '+']? digit+
 let float         = digit+ frac? exp? | frac exp? | "nan" | "inf"
 let bool          = "true" | "false"
-let id            = (letter | '_') (letter | digit | '_')* '\''*
+let id            = ('_') (letter | digit | '_')+ '\''* | (letter) (letter | digit | '_')* '\''*
 let gid           = '|' (id) '|'
 let symbol        = '\'' (id | int)
 let white         = (' ' | '\t')+
@@ -54,6 +54,7 @@ rule read =
   | white                        { read lexbuf }
   | newline                      { new_line lexbuf; read lexbuf }
   | ','                          { COMMA }
+  | "..."                        { THREEDOTS }
   | '.'                          { DOT }
   | ';'                          { SEMICOLON }
   | '('                          { LPAREN }
@@ -75,6 +76,7 @@ rule read =
   | ">="                         { GEQ }
   | ":="                         { DEFEQ }
   | id as x                      { try Hashtbl.find keywords x with Not_found -> ID x }
+  | '_'                          { UNDERSCORE }
   | "//"                         { read_line_comment lexbuf }
   | "/*"                         { read_block_comment lexbuf }
   | _                            { raise (create_syntax_error "Unexpected char" lexbuf) }

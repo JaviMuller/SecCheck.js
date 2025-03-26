@@ -1,0 +1,5 @@
+Prop SqlInjection (v) {
+  .tainted(v)
+  ;
+  sql_execute(_, _, v)
+}
