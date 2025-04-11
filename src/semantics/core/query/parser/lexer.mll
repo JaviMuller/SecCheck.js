@@ -7,6 +7,8 @@
   let keywords = Hashtbl.of_seq @@ List.to_seq
     [
         "Prop"                   , PROP;
+        "Name"                   , NAME;
+        "Value"                  , VALUE;
     ]
           
 
@@ -55,7 +57,6 @@ rule read =
   | newline                      { new_line lexbuf; read lexbuf }
   | ','                          { COMMA }
   | "..."                        { THREEDOTS }
-  | '.'                          { DOT }
   | ';'                          { SEMICOLON }
   | '('                          { LPAREN }
   | ')'                          { RPAREN }
@@ -69,12 +70,18 @@ rule read =
   | '['                          { LBRACK }
   | ']'                          { RBRACK }
   | "=="                         { EQ }
-  | "!="                         { NEQ }
+  (* | "!="                         { NEQ }
   | "<"                          { LT }
   | "<="                         { LEQ }
   | ">"                          { GT }
-  | ">="                         { GEQ }
+  | ">="                         { GEQ } *)
   | ":="                         { DEFEQ }
+  | "/\\"                        { LAND } 
+  | '\xE2' '\x88' '\xA7'         { LAND }
+  | "\\/"                        { LOR }
+  | '\xE2' '\x88' '\xA8'         { LOR }
+  | "!"                          { LNOT }
+  | '\xC2' '\xAC'                { LNOT }
   | id as x                      { try Hashtbl.find keywords x with Not_found -> ID x }
   | '_'                          { UNDERSCORE }
   | "//"                         { read_line_comment lexbuf }

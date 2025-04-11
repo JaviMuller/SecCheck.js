@@ -9,8 +9,8 @@
     source
     ; core
     value
-    expr
     binrelop
-    predicate
-    trace
-    security))
+    formula
+    action
+    query)
+  (preprocess (pps ppx_deriving_yojson)))
