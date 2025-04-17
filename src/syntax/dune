@@ -8,9 +8,14 @@
     ; share
     source
     ; core
-    value
-    binrelop
+    expr
     formula
-    action
+    value
+    ; program
+    paction
+    program
+    transition
+    ; query
+    qaction
     query)
   (preprocess (pps ppx_deriving_yojson)))

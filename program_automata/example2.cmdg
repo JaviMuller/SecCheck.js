@@ -1,0 +1,74 @@
+{                                    
+  "locs": [ "l1", "l2", "l3", "l4", "l5", "l6" ],
+  "preds": [
+    { "name": "tainted", "args": [ { "type": "Location", "value": "l3" } ] },
+    {
+      "name": "name",
+      "args": [
+        { "type": "Location", "value": "l1" },
+        { "type": "Value", "value": "f" }
+      ]
+    },
+    {
+      "name": "name",
+      "args": [
+        { "type": "Location", "value": "l2" },
+        { "type": "Value", "value": "x" }
+      ]
+    },
+    {
+      "name": "name",
+      "args": [
+        { "type": "Location", "value": "l3" },
+        { "type": "Value", "value": "y" }
+      ]
+    },
+    { "name": "tainted", "args": [ { "type": "Location", "value": "l4" } ] },
+    {
+      "name": "name",
+      "args": [
+        { "type": "Location", "value": "l5" },
+        { "type": "Value", "value": "o1" }
+      ]
+    },
+    {
+      "name": "name",
+      "args": [
+        { "type": "Location", "value": "l6" },
+        { "type": "Value", "value": "o2" }
+      ]
+    },
+    { "name": "tainted", "args": [ { "type": "Location", "value": "l2" } ] },
+    {
+      "name": "name",
+      "args": [
+        { "type": "Location", "value": "l4" },
+        { "type": "Value", "value": "z" }
+      ]
+    }
+  ],
+  "states": 2,
+  "final": [ 2 ],
+  "trace": [
+    {
+      "src": 0,
+      "dest": 1,
+      "action": {
+        "type": "PropLookup",
+        "target": [ "l6" ],
+        "object": [ "l5" ],
+        "property": [ "l2" ]
+      }
+    },
+    {
+      "src": 1,
+      "dest": 2,
+      "action": {
+        "type": "PropAssign",
+        "object": [ "l6" ],
+        "property": [ "l3" ],
+        "value": [ "l4" ]
+      }
+    }
+  ]
+}

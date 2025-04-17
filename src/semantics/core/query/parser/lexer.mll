@@ -7,8 +7,6 @@
   let keywords = Hashtbl.of_seq @@ List.to_seq
     [
         "Prop"                   , PROP;
-        "Name"                   , NAME;
-        "Value"                  , VALUE;
     ]
           
 
@@ -69,12 +67,6 @@ rule read =
   | '"'                          { create_string lexbuf @@ read_string (Buffer.create 16) }
   | '['                          { LBRACK }
   | ']'                          { RBRACK }
-  | "=="                         { EQ }
-  (* | "!="                         { NEQ }
-  | "<"                          { LT }
-  | "<="                         { LEQ }
-  | ">"                          { GT }
-  | ">="                         { GEQ } *)
   | ":="                         { DEFEQ }
   | "/\\"                        { LAND } 
   | '\xE2' '\x88' '\xA7'         { LAND }
@@ -135,8 +127,3 @@ and read_block_comment =
   | newline          { new_line lexbuf; read_block_comment lexbuf }
   | _                { read_block_comment lexbuf }
   | eof              { raise (create_syntax_error ~eof:true "Comment is not terminated" lexbuf) }
-
-
-
-
-

@@ -4,7 +4,9 @@
   (public_name trusted-cpg.lib)
   (name TcpgSemantics)
   (modules
-    ; core parsers
+    ; core
+    verification
+    ; query parser
     lexer
     parser
     parsing
