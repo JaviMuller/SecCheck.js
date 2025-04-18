@@ -5,18 +5,16 @@ type t = {
   preds  : ((string * Expr.conc list), unit) Hashtbl.t;
   states : int;
   final  : int list;
-  trace  : Transition.t list; (* Maybe save them indexed by from? *)
+  trace  : (int, Transition.t list) Hashtbl.t; (* Maybe save them indexed by from in hashtbl/map? *)
 }
 
 let is_final({ final; _ } : t) (s : int) : bool =
   List.exists (fun f -> f = s) final
 
 let state_transitions ({ trace; _ } : t) (s : int) : Transition.t list =
-  List.fold_left (fun acc tr ->
-    if Transition.get_src tr = s then
-      tr :: acc
-    else
-      acc) [] trace
+  match Hashtbl.find_opt trace s with
+  | Some ts -> ts
+  | None -> []
 
 let num_states ({ states; _ } : t) : int =
   states
@@ -34,7 +32,7 @@ let to_yojson (p : t) : Yojson.Safe.t =
            ("preds", `List preds_to_yojson);
            ("states", `Int p.states);
            ("final", `List (List.map (fun x -> `Int x) p.final));
-           ("trace", `List (List.map Transition.to_yojson p.trace)) ]
+           ("trace", `List (List.map Transition.to_yojson @@ Hashtbl.fold (fun _ v acc -> acc @ v) p.trace [])) ]
 
 let of_yojson (json : Yojson.Safe.t) : (t, string) result =
   let json_to_string = Yojson.Safe.Util.to_string in
@@ -60,8 +58,14 @@ let of_yojson (json : Yojson.Safe.t) : (t, string) result =
       let trace_json = member "trace" json |> to_list in
       let trace = List.fold_left (fun acc t_json ->
         match Transition.of_yojson t_json with
-        | Ok t -> t :: acc
-        | Error e -> failwith e) [] trace_json in
+        | Ok t ->
+          if Hashtbl.mem acc t.src then
+            let prev_trans = Hashtbl.find acc t.src in
+            Hashtbl.replace acc t.src (t :: prev_trans)
+          else
+            Hashtbl.add acc t.src [t];
+          acc
+        | Error e -> failwith(e)) (Hashtbl.create 1000) trace_json in
       Ok { locs; preds; states; final; trace }
     | _ -> Error "Invalid JSON format"
   with

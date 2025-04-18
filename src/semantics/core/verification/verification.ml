@@ -3,8 +3,13 @@ open TcpgSyntax
 module VarMap = Map.Make (String)
 module StateMap = Map.Make (Int)
 
-let cartesian_product (l1 : 'a list) (l2 : 'b list) : ('a * 'b) list =
-  List.fold_left (fun acc x -> List.fold_left (fun acc' y -> (x, y) :: acc') acc l2) [] l1
+let cartesian_product (lists : 'a list list) : 'a list list =
+  let combine acc lst =
+    List.concat (List.map (fun acc_elem ->
+      List.map (fun elem -> elem :: acc_elem) lst) acc)
+  in
+  List.fold_left combine [[]] lists
+  |> List.map List.rev
 
 let filter_unwrap lst =
   List.filter_map (fun x -> x) lst
@@ -31,51 +36,55 @@ let init_state (f : Formula.t) : state = {
   formula = f;
 }
 
-let rec unify_aux (bindings : string VarMap.t option list) (vars: string list) (locs : string list list) : string VarMap.t list option =
-  List.fold_left (fun (acc : string VarMap.t list option) (binding : string VarMap.t option)->
-    match acc with
-    | None -> None
-    | Some acc' ->
-      match binding with
-      | None -> None
-      | Some binding' ->
-        match vars, locs with
-        | [], [] -> Some (binding' :: acc')
-        | [], _ -> None
-        | _, [] -> None
-        | var :: rest_vars, locs :: rest_locs ->
-          (match unify_aux bindings rest_vars rest_locs with
+let unify_aux (bindings : string VarMap.t) (vars: string list) (locs : string list list) : string VarMap.t list option =
+  try
+    (* Preprocessing for efficiency (will apply constraints found in bindings before any of the new applications) *)
+    let var_locs = List.combine vars locs in
+    let filtered_locs = List.map (fun (var, ls) ->
+      match VarMap.find_opt var bindings with
+      | None -> ls
+      | Some l ->
+        if List.exists (fun x -> x = l) ls then
+          [l]
+        else
+          []) var_locs in
+    if List.exists (fun l -> l = []) filtered_locs then
+      None
+    else
+      let locs' = cartesian_product filtered_locs in
+      Some (filter_unwrap @@ List.map (fun ls ->
+        let kv_pairs = List.combine vars ls in
+        List.fold_left (fun o_map (key, value) ->
+          match o_map with
           | None -> None
-          | Some bindings_rest ->
-            (match VarMap.find_opt var binding' with
-            | Some l ->
-              if List.exists (fun x -> x = l) locs then
-                Some (bindings_rest @ acc')
+          | Some map ->
+            (match VarMap.find_opt key map with
+            | None -> Some (VarMap.add key value map)
+            | Some v' ->
+              if v' = value then
+                Some map
               else
-                Some acc'
-            | None ->
-              let new_binds = List.concat @@ List.map (fun bind -> 
-                                                       List.map (fun add_to_map -> add_to_map bind) @@
-                                                                List.map (VarMap.add var) locs) bindings_rest in
-              let new_acc = new_binds @ acc' in
-              Some new_acc))
-            (* For each of the bindings that resulted from the recursive call, generate 
-               a list of maps, one for each mapping x->v for v in locs _rest*)
-  ) (Some []) bindings
+                None
+            )) 
+          (Some bindings) kv_pairs
+        ) locs')
+  with
+  | Invalid_argument _ -> None
+
 
 let unify (bindings : string VarMap.t) (q_action : Qaction.t) (p_action : Paction.t) : string VarMap.t list option =
   match q_action, p_action with
   | FuncCall (nameq, argsq), FuncCall (namep, argsp) ->
-    unify_aux [Some bindings] (nameq :: argsq) (namep :: argsp)
+    unify_aux bindings (nameq :: argsq) (namep :: argsp)
   | FuncCallWithArg (nameq, argq), FuncCall(namep, argsp) ->
     let locs_all_args = List.sort_uniq compare @@ List.concat argsp in
-    unify_aux [Some bindings] [nameq; argq] [namep; locs_all_args]
+    unify_aux bindings [nameq; argq] [namep; locs_all_args]
   | FuncCallAnyArgs nameq, FuncCall(namep, _) ->
-    unify_aux [Some bindings] [nameq] [namep]
+    unify_aux bindings [nameq] [namep]
   | PropAssign (objq, propq, vq), PropAssign (objp, propp, vp) ->
-    unify_aux [Some bindings] [objq; propq; vq] [objp; propp; vp]
+    unify_aux bindings [objq; propq; vq] [objp; propp; vp]
   | PropLookup (varq, objq, propq), PropLookup (varp, objp, propp) ->
-    unify_aux [Some bindings] [varq; objq; propq] [varp; objp; propp]
+    unify_aux bindings [varq; objq; propq] [varp; objp; propp]
   | _, _ -> None
 
 let rec is_sat (bindings : string VarMap.t) (p : Program.t) (formula : Formula.t) : Formula.t =
@@ -121,40 +130,49 @@ let rec is_sat (bindings : string VarMap.t) (p : Program.t) (formula : Formula.t
     else
       Or (List.filter (fun f' -> f' <> Formula.False) fs')
 
-let analyze_transition (s : state) (p : Program.t) (q_action : Qaction.t) (t : Transition.t) : state list =
+let analyze_transition (s : state) (q : Query.t) (p : Program.t) (q_action : Qaction.t) (t : Transition.t) : state list =
   let new_p_state = Transition.get_dest t in
   let p_action = Transition.get_action t in
+  let q_next_state = Query.next_state q s.q_state in
+  let p_new_progress = StateMap.add new_p_state s.q_state s.progress in
+  let p_q_new_progress = StateMap.add new_p_state q_next_state s.progress in
+  let p_new_state = { s with p_state = new_p_state; progress = p_new_progress } in
   match unify s.bindings q_action p_action with
   | None ->
-    let new_progress = StateMap.add new_p_state s.q_state s.progress in
     (match StateMap.find_opt new_p_state s.progress with
     | Some q_s ->
       if q_s = s.q_state then
         (* Same code state, no query progress *)
         []
       else
-        [{ s with p_state = new_p_state; progress = new_progress }]
+        [p_new_state]
     | None ->
-      [{ s with p_state = new_p_state; progress = new_progress }])
+      [p_new_state])
   | Some new_bindings ->
-    let new_q_state = s.q_state + 1 in
-    let new_progress = StateMap.add new_p_state new_q_state s.progress in
-    filter_unwrap @@ List.map (fun new_b ->
+    (* No query transition + all possible transitions given different bindings *)
+    let q_progress_new_states = filter_unwrap @@ List.map (fun new_b ->
         let new_formula = is_sat new_b p s.formula in  
         (match new_formula with
         | False -> None
         | _ ->
-          let new_q_state = s.q_state + 1 in
-          Some { q_state = new_q_state;
+          Some { q_state = q_next_state;
               p_state = new_p_state;
               bindings = new_b;
-              progress = new_progress;
-              formula = new_formula; })) new_bindings
+              progress = p_q_new_progress;
+              formula = new_formula; })) new_bindings in
+    match StateMap.find_opt new_p_state s.progress with
+    | Some q_s ->
+      if q_s = s.q_state then
+        q_progress_new_states
+      else
+        p_new_state :: q_progress_new_states
+    | None ->
+      p_new_state :: q_progress_new_states
 
 let transition (s : state) (q : Query.t) (p : Program.t) : state list =
   let p_transitions = Program.state_transitions p s.p_state in
   let q_action = Query.get_state_action q s.q_state in
-  List.concat @@ List.map (analyze_transition s p q_action) p_transitions
+  List.concat @@ List.map (analyze_transition s q p q_action) p_transitions
 
 let verify (q : Query.t) (p : Program.t) : state list =
   let rec aux (i_states : state list) (o_states : state list) : state list =

@@ -6,6 +6,9 @@ type t =
     trace   : Qaction.t list;
   } [@@deriving yojson]
 
+let next_state (_ : t) (s : int) =
+  s + 1
+
 let to_string (q : t) : string =
   "Prop " ^ q.name ^ "(" ^ (String.concat ", " q.vars) ^ ") {\n" ^
   "  " ^ Formula.to_string q.formula ^ "\n" ^

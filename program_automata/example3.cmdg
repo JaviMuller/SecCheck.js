@@ -1,5 +1,5 @@
 {                                    
-  "locs": [ "l1", "l2", "l3", "l4", "l5", "l6" ],
+  "locs": [ "l1", "l2", "l3", "l4", "l5" ],
   "preds": [
     {
       "name": "name",
@@ -26,48 +26,67 @@
       "name": "name",
       "args": [
         { "type": "Location", "value": "l4" },
-        { "type": "Value", "value": "z" }
+        { "type": "Value", "value": "console.log" }
+      ]
+    },
+    {
+      "name": "name",
+      "args": [
+        { "type": "Location", "value": "l4" },
+        { "type": "Value", "value": "aux_1" }
       ]
     },
     {
       "name": "name",
       "args": [
         { "type": "Location", "value": "l5" },
-        { "type": "Value", "value": "o1" }
-      ]
-    },
-    {
-      "name": "name",
-      "args": [
-        { "type": "Location", "value": "l6" },
-        { "type": "Value", "value": "o2" }
+        { "type": "Value", "value": "eval" }
       ]
     },
     { "name": "tainted", "args": [ { "type": "Location", "value": "l2" } ] },
     { "name": "tainted", "args": [ { "type": "Location", "value": "l3" } ] },
-    { "name": "tainted", "args": [ { "type": "Location", "value": "l4" } ] }
+    {
+      "name": "injection_sink",
+      "args": [ { "type": "Location", "value": "l5" } ]
+    }
   ],
-  "states": 2,
-  "final": [ 2 ],
+  "states": 4,
+  "final": [ 4 ],
   "trace": [
     {
       "src": 0,
       "dest": 1,
       "action": {
-        "type": "PropLookup",
-        "target": [ "l6" ],
-        "object": [ "l5" ],
-        "property": [ "l2" ]
+        "type": "FuncCall",
+        "callee": [ "l4" ],
+        "args": [ [ "l2" ] ]
       }
     },
     {
       "src": 1,
       "dest": 2,
       "action": {
-        "type": "PropAssign",
-        "object": [ "l6" ],
-        "property": [ "l3" ],
-        "value": [ "l4" ]
+        "type": "FuncCall",
+        "callee": [ "l4" ],
+        "args": [ [ "l3" ] ]
+      }
+    },
+    {
+      "src": 2,
+      "dest": 3,
+      "action": {
+        "type": "FuncCall",
+        "callee": [ "l5" ],
+        "args": [ [ "l2" ] ]
+      }
+    },
+    {
+      "src": 3,
+      "dest": 4,
+      "action": {
+        "type": "FuncCall",
+        "callee": [ "l5" ],
+        "args": [ [ "l3" ] ]
       }
     }
   ]
