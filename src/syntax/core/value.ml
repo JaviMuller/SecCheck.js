@@ -11,7 +11,7 @@ let to_string(v : t) : string =
   | Bool x -> string_of_bool x
   | Int x -> string_of_int x
   | Float x -> string_of_float x
-  | String x -> x
+  | String x -> "\"" ^ x ^ "\""
 
 let to_yojson(v : t) : Yojson.Safe.t =
   match v with

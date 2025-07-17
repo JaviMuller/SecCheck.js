@@ -5,12 +5,16 @@ let () =
   if Array.length Sys.argv <> 3 then
     print_endline "Usage: dune exec trusted-cpg <program_json> <query_file>"
   else
-    let program_ic = open_in Sys.argv.(1) in
+    (* let program_ic = open_in Sys.argv.(1) in
     let program_json = In_channel.input_all program_ic in
-    let program = Program.of_yojson @@ Yojson.Safe.from_string program_json in
+    let program = Program.of_yojson @@ Yojson.Safe.from_string program_json in *)
     let query_file = Sys.argv.(2) in
     let query = TcpgSemantics.Parsing.parse_query_from_file query_file in
-    match program with
+    let qautom = Qautomaton.from_trcf query.tracef in
+    match qautom with
+    | Ok qautom -> print_endline @@ Yojson.Safe.pretty_to_string (Qautomaton.to_yojson qautom)
+    | Error e -> print_endline @@ "Error: " ^  e
+    (* match program with
     | Ok (p) ->
       let final_states = TcpgSemantics.Verification.verify query p in
       (match final_states with
@@ -22,7 +26,7 @@ let () =
                 print_string @@ TcpgSemantics.Verification.bindings_to_string bindings;
                 print_endline "}") final_states
       )
-    | Error m -> print_endline m
+    | Error m -> print_endline m *)
 
   (* let locs = ["l1"; "l2"; "l3"; "l4"; "l5"; "l6"; "l7"; "l8"] in
   let props : ((string * Expr.conc list), unit) Hashtbl.t = Hashtbl.create 10 in

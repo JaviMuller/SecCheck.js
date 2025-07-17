@@ -6,7 +6,10 @@
 
   let keywords = Hashtbl.of_seq @@ List.to_seq
     [
-        "Prop"                   , PROP;
+      "Prop"                   , PROP;
+      "true"                   , TRUE;
+      "false"                  , FALSE;
+      "PAST"                   , PAST;
     ]
           
 
@@ -60,6 +63,41 @@ rule read =
   | ')'                          { RPAREN }
   | '{'                          { LBRACE }
   | '}'                          { RBRACE }
+  (* Formula Symbols *)
+  | '\xE2' '\x8A' '\xA4'         { TRUE }  (* ⊤ *)
+  | '\x22' '\xA5'                { FALSE } (* ⊥ *)
+  | '\xC2' '\xAC'                { LNOT }  (* ¬ *)
+  | "!"                          { LNOT }
+  | "~"                          { LNOT }
+  | '\xE2' '\x88' '\xA7'         { LAND }  (* ∧ *)
+  | "/\\"                        { LAND } 
+  | "&&"                         { LAND } 
+  | "&"                          { LAND }
+  | '\xE2' '\x88' '\xA8'         { LOR }   (* ∨ *)
+  | "\\/"                        { LOR }
+  | "||"                         { LOR }
+  | "|"                          { LOR }
+  | "->"                         { LIMPL }
+  | "=>"                         { LIMPL }
+  | "<->"                        { LEQUIV }
+  | "<=>"                        { LEQUIV }
+  | '\xE2' '\x97' '\x8B'         { NEXT }       (* ○ *)
+  | "X"                          { NEXT }
+  | "WX"                         { WEAKNEXT }
+  | '\xF0' '\x9D' '\x93' '\xA4'  { UNTIL }      (* 𝓤 *)
+  | "U"                          { UNTIL }
+  | '\xF0' '\x9D' '\x93' '\xA1'  { RELEASE }    (* 𝓡 *) 
+  | "R"                          { RELEASE }
+  | '\x25' '\xC7'                { EVENTUALLY } (* ◇ *)
+  | "F"                          { EVENTUALLY }
+  | '\xE2' '\x96' '\xA1'         { ALWAYS }     (* □ *)
+  | "G"                          { ALWAYS }
+  | "Y"                          { BEFORE }
+  | "WY"                         { WEAKBEFORE }
+  | "S"                          { SINCE }
+  | "P"                          { PASTRELEASE }
+  | "O"                          { ONCE }
+  | "H"                          { HISTORICALLY }
   (* Abstraction symbols *)
   | bool                         { BOOL (bool_of_string @@ Lexing.lexeme lexbuf) }
   | int                          { INT (int_of_string @@ Lexing.lexeme lexbuf) }
@@ -68,12 +106,6 @@ rule read =
   | '['                          { LBRACK }
   | ']'                          { RBRACK }
   | ":="                         { DEFEQ }
-  | "/\\"                        { LAND } 
-  | '\xE2' '\x88' '\xA7'         { LAND }
-  | "\\/"                        { LOR }
-  | '\xE2' '\x88' '\xA8'         { LOR }
-  | "!"                          { LNOT }
-  | '\xC2' '\xAC'                { LNOT }
   | id as x                      { try Hashtbl.find keywords x with Not_found -> ID x }
   | '_'                          { UNDERSCORE }
   | "//"                         { read_line_comment lexbuf }

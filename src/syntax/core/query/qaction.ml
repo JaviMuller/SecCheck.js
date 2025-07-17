@@ -6,6 +6,7 @@ type t =
   | FuncCallAnyArgs of string
   | PropAssign      of (string * string * string)
   | PropLookup      of (string * string * string)
+  | Any
 
 let to_string (a : t) : string =
   match a with
@@ -14,6 +15,7 @@ let to_string (a : t) : string =
   | FuncCallAnyArgs (name) -> name ^ "(...)"
   | PropAssign (obj, prop, v) -> obj ^ "[" ^ prop ^ "]" ^ " := " ^ v
   | PropLookup (var, obj, prop) -> var ^ " := " ^ obj ^ "[" ^ prop ^ "]"
+  | Any -> "*"
 
 let to_yojson (a : t) : Yojson.Safe.t =
   match a with
@@ -38,6 +40,7 @@ let to_yojson (a : t) : Yojson.Safe.t =
              ("target", `String targ);
              ("object", `String obj);
              ("property", `String prop)]
+  | Any -> `Assoc [ ("type", `String "Any") ]
 
 let of_yojson (json : Yojson.Safe.t) : (t, string) result =
   try
@@ -68,6 +71,7 @@ let of_yojson (json : Yojson.Safe.t) : (t, string) result =
           let obj = member "object" json |> json_to_string in
           let prop = member "property" json |> json_to_string in
           Ok (PropLookup (targ, obj, prop))
+        | "Any" -> Ok (Any)
         | s ->
           Error ("Unknown action type: " ^ s))
     | _ ->

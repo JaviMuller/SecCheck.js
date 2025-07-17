@@ -1,5 +1,5 @@
 (executable
  (public_name trusted-cpg)
  (name main)
- ; (modes byte exe) ; used for debugging with earlybird
+ (modes byte exe) ; used for debugging with earlybird
  (libraries trusted_cpg))

@@ -10,5 +10,14 @@ _build/
 _coverage/
 *.coverage
 
+# Python Files
+__pycache__/
+
 # Local Opam switch
 _opam/
+
+# Mona build
+mona*/
+
+out*
+

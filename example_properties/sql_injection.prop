@@ -1,5 +1,5 @@
-Prop SqlInjection (v) {
-  tainted(v)
+Prop SqlInjection (f, v) {
+  tainted(v) /\ same_fun(f, "sql_execute")
   ;
-  sql_execute(_, _, v)
+  f(_, _, v)
 }

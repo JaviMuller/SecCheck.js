@@ -65,7 +65,7 @@ let sequence_results (results: ('a, string) result list) : ('a list, string) res
   | [] -> Ok (List.rev acc)
   | (Ok x) :: xs -> aux (x :: acc) xs
   | (Error m) :: _ -> Error m in
-aux [] results
+  aux [] results
 
 let rec of_yojson (json : Yojson.Safe.t) : (t, string) result =
   try

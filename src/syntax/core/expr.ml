@@ -11,6 +11,7 @@ type abs =
 
 let is_concrete (f : abs) : bool =
   match f with
+  | UVar -> false
   | Var _ -> false
   | _ -> true
 
@@ -23,10 +24,10 @@ let to_conc (f : abs) : conc option =
 
 let abs_to_string (e : abs) : string =
   match e with
-  | UVar -> "UVar()"
-  | Var v -> "Var(" ^ v ^ ")"
+  | UVar -> "_"
+  | Var v -> v
   | Loc l -> "Loc(" ^ l ^ ")"
-  | Val v -> "Val(" ^ Value.to_string v ^ ")"
+  | Val v -> Value.to_string v
 
 let conc_to_string (e : conc) : string =
   match e with

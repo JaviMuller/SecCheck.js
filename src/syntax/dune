@@ -9,13 +9,17 @@
     source
     ; core
     expr
-    formula
+    invformula
     value
     ; program
     paction
-    program
-    transition
+    ptransition
+    pautomaton
     ; query
+    trcformula
     qaction
-    query)
+    qtransition
+    query
+    qautomaton
+    )
   (preprocess (pps ppx_deriving_yojson)))

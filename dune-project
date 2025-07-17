@@ -1,6 +1,6 @@
 (lang dune 3.17)
 
-; (map_workspace_root false) ; used for debugging with earlybird
+(map_workspace_root false) ; used for debugging with earlybird
 
 (using menhir 3.0)
 

@@ -15,11 +15,11 @@ let filter_unwrap lst =
   List.filter_map (fun x -> x) lst
 
 type state = {
-  q_state : int;
-  p_state : int;
-  bindings : string VarMap.t;
-  progress : int StateMap.t;
-  formula : Formula.t;
+  q_state   : int;
+  p_state   : int;
+  bindings  : string VarMap.t;
+  progress  : int StateMap.t;
+  invariant : Invformula.t;
 }
 
 let get_bindings ({ bindings; _ } : state) : string VarMap.t =
@@ -28,12 +28,12 @@ let get_bindings ({ bindings; _ } : state) : string VarMap.t =
 let bindings_to_string (bindings : string VarMap.t) : string =
   VarMap.fold (fun k v acc -> Printf.sprintf "%s  %s -> %s\n" acc k v) bindings ""
 
-let init_state (f : Formula.t) : state = {
+let init_state (f : Invformula.t) : state = {
   q_state = 0;
   p_state = 0;
   bindings = VarMap.empty;
   progress = StateMap.empty;
-  formula = f;
+  invariant = f;
 }
 
 let unify_aux (bindings : string VarMap.t) (vars: string list) (locs : string list list) : string VarMap.t list option =
@@ -87,7 +87,7 @@ let unify (bindings : string VarMap.t) (q_action : Qaction.t) (p_action : Pactio
     unify_aux bindings [varq; objq; propq] [varp; objp; propp]
   | _, _ -> None
 
-let rec is_sat (bindings : string VarMap.t) (p : Program.t) (formula : Formula.t) : Formula.t =
+let rec is_sat (bindings : string VarMap.t) (p : Program.t) (formula : Invformula.t) : Invformula.t =
   match formula with
   | True -> True
   | False -> False
@@ -115,20 +115,20 @@ let rec is_sat (bindings : string VarMap.t) (p : Program.t) (formula : Formula.t
     | f' -> Not f')
   | And fs ->
     let fs' = List.map (is_sat bindings p) fs in
-    if List.exists (fun f' -> f' = Formula.False) fs' then
+    if List.exists (fun f' -> f' = Invformula.False) fs' then
       False
-    else if List.for_all (fun f' -> f' = Formula.True) fs' then
+    else if List.for_all (fun f' -> f' = Invformula.True) fs' then
       True
     else
-      And (List.filter (fun f' -> f' <> Formula.True) fs')
+      And (List.filter (fun f' -> f' <> Invformula.True) fs')
   | Or fs ->
     let fs' = List.map (is_sat bindings p) fs in
-    if List.exists (fun f' -> f' = Formula.True) fs' then
+    if List.exists (fun f' -> f' = Invformula.True) fs' then
       True
-    else if List.for_all (fun f' -> f' = Formula.False) fs' then
+    else if List.for_all (fun f' -> f' = Invformula.False) fs' then
       False
     else
-      Or (List.filter (fun f' -> f' <> Formula.False) fs')
+      Or (List.filter (fun f' -> f' <> Invformula.False) fs')
 
 let analyze_transition (s : state) (q : Query.t) (p : Program.t) (q_action : Qaction.t) (t : Transition.t) : state list =
   let new_p_state = Transition.get_dest t in
@@ -151,15 +151,15 @@ let analyze_transition (s : state) (q : Query.t) (p : Program.t) (q_action : Qac
   | Some new_bindings ->
     (* No query transition + all possible transitions given different bindings *)
     let q_progress_new_states = filter_unwrap @@ List.map (fun new_b ->
-        let new_formula = is_sat new_b p s.formula in  
-        (match new_formula with
+        let new_invariant = is_sat new_b p s.invariant in  
+        (match new_invariant with
         | False -> None
         | _ ->
           Some { q_state = q_next_state;
               p_state = new_p_state;
               bindings = new_b;
               progress = p_q_new_progress;
-              formula = new_formula; })) new_bindings in
+              invariant = new_invariant; })) new_bindings in
     match StateMap.find_opt new_p_state s.progress with
     | Some q_s ->
       if q_s = s.q_state then
@@ -187,4 +187,4 @@ let verify (q : Query.t) (p : Program.t) : state list =
         let new_states = transition s q p in
         (* BFS *)
         aux (rest @ new_states) o_states in
-  aux [init_state @@ Query.get_formula q] []
+  aux [init_state @@ Query.get_invariant q] []

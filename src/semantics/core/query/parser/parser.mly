@@ -4,6 +4,8 @@
 
 %{
   open TcpgSyntax
+  module Future = Trcformula.Future
+  module Past = Trcformula.Past
   let variables = Hashtbl.create 10
   let add_variable name = Hashtbl.add variables name true
   let check_variable name = if not (Hashtbl.mem variables name) then
@@ -32,13 +34,31 @@
 %token LBRACK RBRACK
 %token LBRACE RBRACE
 %token DEFEQ
-%token LAND LOR LNOT
+
+(* ========== Logic Tokens ======== *)
+%token TRUE FALSE
+%token LNOT LAND LOR
+%token LIMPL LEQUIV
+%token NEXT WEAKNEXT
+%token UNTIL RELEASE
+%token EVENTUALLY ALWAYS
+%token PAST
+%token BEFORE WEAKBEFORE
+%token SINCE PASTRELEASE
+%token ONCE HISTORICALLY
 
 (* ========== Precedence and Associativity ========== *)
 
+%right UNTIL RELEASE
+%right SINCE PASTRELEASE
+%right COMMA
+%right LEQUIV
+%right LIMPL
 %left LOR
 %left LAND
 %nonassoc LNOT
+%nonassoc NEXT WEAKNEXT EVENTUALLY ALWAYS
+%nonassoc BEFORE WEAKBEFORE ONCE HISTORICALLY 
 
 (* ========== Entry Point ========== *)
 
@@ -58,22 +78,102 @@ let entry_sec_prop_target := ~ = sec_prop_target; EOF; <>
 
 let sec_prop_target :=
   | PROP; name = name_target; LPAREN; vars = separated_list(COMMA, new_id_target); RPAREN;
-    LBRACE; formula = formula_target; SEMICOLON;
-    trace = separated_list(COMMA, trace_target); RBRACE;
-    { Query.{name = name; vars = vars; formula = formula; trace = trace} }
+    LBRACE; invariant = invariant_target; SEMICOLON;
+    tracef = trace_formula_target; RBRACE;
+    { Query.{name = name; vars = vars; invariant = invariant; tracef = tracef} }
 
-let formula_target :=
-  | LPAREN; ~ = formula_target; RPAREN; <>
+let invariant_target :=
+  | LPAREN; ~ = invariant_target; RPAREN; <>
+  | TRUE;
+    { Invformula.True }
+  | FALSE;
+    { Invformula.False }
   | name = name_target; LPAREN; args = separated_list(COMMA, expr_target); RPAREN;
-    { Formula.Predicate (name, args) }
-  | LNOT; f = formula_target;
-    { Formula.Not f }
-  | f1 = formula_target; LAND; f2 = formula_target;
-    { Formula.And [f1; f2] }
-  | f1 = formula_target; LOR; f2 = formula_target;
-    { Formula.Or [f1; f2] }
+    { Invformula.Predicate (name, args) }
+  | LNOT; f = invariant_target;
+    { Invformula.Not f }
+  | f1 = invariant_target; LAND; f2 = invariant_target;
+    { Invformula.And [f1; f2] }
+  | f1 = invariant_target; LOR; f2 = invariant_target;
+    { Invformula.Or [f1; f2] }
 
-let trace_target :=
+let trace_formula_target :=
+  | f = future_formula_target;
+    { Trcformula.FutureFormula f }
+  | LPAREN; PAST; RPAREN; f = past_formula_target;
+    { Trcformula.PastFormula f }
+
+// let sequence_target :=
+//   | qact = query_action_target;
+//     { [qact] }
+//   | qact = query_action_target; COMMA; qacts = sequence_target;
+//     { qact :: qacts }
+
+let future_formula_target :=
+  | TRUE;
+    { Future.True }
+  | FALSE;
+    { Future.False }
+  | LPAREN; ~ = future_formula_target; RPAREN; <>
+  | qaction = query_action_target;
+    { Future.Action qaction }
+  | LNOT; f = future_formula_target;
+    { Future.Not f }
+  | f1 = future_formula_target; COMMA; f2 = future_formula_target;
+    { Future.Sequence [f1; f2] }
+  | f1 = future_formula_target; LAND; f2 = future_formula_target;
+    { Future.And [f1; f2] }
+  | f1 = future_formula_target; LOR; f2 = future_formula_target;
+    { Future.Or [f1; f2]}
+  | f1 = future_formula_target; LIMPL; f2 = future_formula_target;
+    { Future.Implication (f1, f2) }
+  | f1 = future_formula_target; LEQUIV; f2 = future_formula_target;
+    { Future.Equivalence (f1, f2) }
+  | NEXT; f = future_formula_target;
+    { Future.Next f }
+  | WEAKNEXT; f = future_formula_target;
+    { Future.WeakNext f }
+  | f1 = future_formula_target; UNTIL; f2 = future_formula_target;
+    { Future.Until (f1, f2) }
+  | f1 = future_formula_target; RELEASE; f2 = future_formula_target;
+    { Future.Release (f1, f2) }
+  | EVENTUALLY; f = future_formula_target;
+    { Future.Eventually f }
+  | ALWAYS; f = future_formula_target;
+    { Future.Always f }
+
+let past_formula_target :=
+  | TRUE;
+    { Past.True }
+  | FALSE;
+    { Past.False }
+  | LPAREN; ~ = past_formula_target; RPAREN; <>
+  | qaction = query_action_target;
+    { Past.Action qaction }
+  | LNOT; f = past_formula_target;
+    { Past.Not f }
+  | f1 = past_formula_target; LAND; f2 = past_formula_target;
+    { Past.And [f1; f2] }
+  | f1 = past_formula_target; LOR; f2 = past_formula_target;
+    { Past.Or [f1; f2] }
+  | f1 = past_formula_target; LIMPL; f2 = past_formula_target;
+    { Past.Implication (f1, f2) }
+  | f1 = past_formula_target; LEQUIV; f2 = past_formula_target;
+    { Past.Equivalence (f1, f2) }
+  | BEFORE; f = past_formula_target;
+    { Past.Before f }
+  | WEAKBEFORE; f = past_formula_target;
+    { Past.WeakBefore f }
+  | f1 = past_formula_target; SINCE; f2 = past_formula_target;
+    { Past.Since (f1, f2) }
+  | f1 = past_formula_target; PASTRELEASE; f2 = past_formula_target;
+    { Past.PastRelease (f1, f2) }
+  | ONCE; f = past_formula_target;
+    { Past.Once f }
+  | HISTORICALLY; f = past_formula_target;
+    { Past.Historically f }
+
+let query_action_target :=
   // | ~ = relop_target; <>
   | func = id_target; LPAREN; args = separated_list(COMMA, id_target); RPAREN;
     { Qaction.FuncCall (func, args) }
