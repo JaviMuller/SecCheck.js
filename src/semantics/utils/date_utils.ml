@@ -15,7 +15,7 @@
  *)
 
 open Prelude
-open TcpgBase
+open SecCheckJSBase
 
 (*YYYY-MM-DDTHH:mm:ss.sssZ*)
 let is_final_index str i =

@@ -10,6 +10,14 @@
       "true"                   , TRUE;
       "false"                  , FALSE;
       "PAST"                   , PAST;
+      "base_taint"             , BASE_TAINT;
+      "sink"                   , SINK;
+      "sanitizer"              , SANITIZER;
+      "has_value"              , HAS_VALUE;
+      "has_fun_name"           , HAS_FUN_NAME;
+      "depends"                , DEPENDS;
+      "tainted"                , TAINTED;
+      "same_value"             , SAME_VALUE;
     ]
           
 

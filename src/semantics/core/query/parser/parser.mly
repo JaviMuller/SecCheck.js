@@ -3,7 +3,7 @@
 (* ================================ *)
 
 %{
-  open TcpgSyntax
+  open SecCheckJSSyntax
   module Future = Trcformula.Future
   module Past = Trcformula.Past
   let variables = Hashtbl.create 10
@@ -34,6 +34,13 @@
 %token LBRACK RBRACK
 %token LBRACE RBRACE
 %token DEFEQ
+
+(* ========== Predicate Names ========== *)
+
+%token BASE_TAINT
+%token SINK SANITIZER HAS_VALUE
+%token HAS_FUN_NAME
+%token DEPENDS TAINTED SAME_VALUE
 
 (* ========== Logic Tokens ======== *)
 %token TRUE FALSE
@@ -88,8 +95,8 @@ let invariant_target :=
     { Invformula.True }
   | FALSE;
     { Invformula.False }
-  | name = name_target; LPAREN; args = separated_list(COMMA, expr_target); RPAREN;
-    { Invformula.Predicate (name, args) }
+  | p = pred_target;
+    { Invformula.Pred p }
   | LNOT; f = invariant_target;
     { Invformula.Not f }
   | f1 = invariant_target; LAND; f2 = invariant_target;
@@ -97,17 +104,29 @@ let invariant_target :=
   | f1 = invariant_target; LOR; f2 = invariant_target;
     { Invformula.Or [f1; f2] }
 
+let pred_target :=
+  | BASE_TAINT; LPAREN; v = id_target; RPAREN;
+    { Qpred.BaseTaint v }
+  | SINK; LPAREN; v = id_target; RPAREN;
+    { Qpred.Sink v }
+  | SANITIZER; LPAREN; v = id_target; RPAREN;
+    { Qpred.Sanitizer v }
+  | HAS_VALUE; LPAREN; x = id_target; COMMA; v = val_target; RPAREN;
+    { Qpred.HasValue (x, v) }
+  | HAS_FUN_NAME; LPAREN; f = id_target; COMMA; name = name_target; RPAREN;
+    { Qpred.HasFunName (f, name) }
+  | DEPENDS; LPAREN; v1 = id_target; COMMA; v2 = id_target; RPAREN;
+    { Qpred.Depends (v1, v2) }
+  | TAINTED; LPAREN; v1 = id_target; RPAREN;
+    { Qpred.Tainted (v1) }
+  | SAME_VALUE; LPAREN; v1 = id_target; COMMA; v2 = id_target; RPAREN;
+    { Qpred.SameValue (v1, v2) }
+
 let trace_formula_target :=
   | f = future_formula_target;
     { Trcformula.FutureFormula f }
   | LPAREN; PAST; RPAREN; f = past_formula_target;
     { Trcformula.PastFormula f }
-
-// let sequence_target :=
-//   | qact = query_action_target;
-//     { [qact] }
-//   | qact = query_action_target; COMMA; qacts = sequence_target;
-//     { qact :: qacts }
 
 let future_formula_target :=
   | TRUE;
@@ -186,10 +205,6 @@ let query_action_target :=
   | var = id_target; DEFEQ; obj = id_target; LBRACK; prop = id_target; RBRACK;
     { Qaction.PropLookup (var, obj, prop) }
 
-let expr_target :=
-  | value = val_target; { Expr.Val value}
-  | var = id_target; { Expr.Var var }
-
 let val_target :=
   | b = BOOL;        < Value.Bool >
   | i = INT;         < Value.Int >
@@ -198,6 +213,6 @@ let val_target :=
 
 let new_id_target := x = ID; { add_variable x; x }
 let id_target :=
-  | UNDERSCORE; { "_" }
-  | x = ID; { check_variable x; x }
+  | UNDERSCORE; { Qvar.UVar }
+  | x = ID; { check_variable x; Qvar.Var x }
 let name_target := x = ID; { x }

@@ -12,9 +12,9 @@ authors: [
 ]
 license: "LICENSE"
 tags: ["add topics" "to describe" "your" "project"]
-homepage: "https://github.com/JaviMuller/TrustedCPG"
+homepage: "https://github.com/JaviMuller/SecCheck.js"
 doc: "https://url/to/documentation"
-bug-reports: "https://github.com/JaviMuller/TrustedCPG/issues"
+bug-reports: "https://github.com/JaviMuller/SecCheck.js/issues"
 depends: [
   "ocaml" {>= "5.0.0"}
   "dune" {>= "3.17"}
@@ -39,4 +39,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/JaviMuller/TrustedCPG.git"
+dev-repo: "git+https://github.com/JaviMuller/SecCheck.js.git"

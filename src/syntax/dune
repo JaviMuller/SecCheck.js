@@ -1,24 +1,27 @@
 (include_subdirs unqualified)
 
 (library
-  (public_name trusted-cpg.syntax)
-  (name TcpgSyntax)
-  (libraries TcpgBase fmt prelude)
+  (public_name sec-check-js.syntax)
+  (name SecCheckJSSyntax)
+  (libraries SecCheckJSBase fmt prelude)
   (modules
     ; share
     source
     ; core
-    expr
-    invformula
     value
     ; program
+    ploc
+    ppred
     paction
     ptransition
     pautomaton
     ; query
-    trcformula
+    qvar
+    qpred
     qaction
     qtransition
+    invformula
+    trcformula
     query
     qautomaton
     )

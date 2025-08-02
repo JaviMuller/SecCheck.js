@@ -3,10 +3,10 @@ open Yojson.Safe.Util
 type t =
   | True
   | False
-  | Predicate of (string * Expr.abs list)
-  | Not       of t
-  | And       of t list
-  | Or        of t list
+  | Pred  of Qpred.t
+  | Not   of t
+  | And   of t list
+  | Or    of t list
 
 let rec flatten (f : t) : t =
   match f with
@@ -29,7 +29,7 @@ let rec to_string_aux (f : t) : string =
   match f with
   | True -> "\u{22A4}"
   | False -> "\u{22A5}"
-  | Predicate (name, args) -> name ^ "(" ^ (String.concat ", " @@ List.map Expr.abs_to_string args) ^ ")"
+  | Pred p -> Qpred.to_string p
   | Not f' -> "\u{00AC} " ^ (to_string_aux f')
   | And fs -> "(" ^ String.concat " \u{2227} " (List.map to_string_aux fs) ^ ")"
   | Or fs -> "(" ^ String.concat " \u{2228} " (List.map to_string_aux fs) ^ ")" 
@@ -43,10 +43,9 @@ let rec to_yojson_aux (f : t) : Yojson.Safe.t =
     `Assoc [ ("type", `String "True") ]
   | False ->
     `Assoc [ ("type", `String "False") ]
-  | Predicate (name, args) ->
-    `Assoc [ ("type", `String "Predicate");
-             ("name", `String name);
-             ("args", `List (List.map Expr.abs_to_yojson args)) ]
+  | Pred p ->
+      `Assoc [ ("type", `String "Pred");
+               ("pred", Qpred.to_yojson p)]
   | Not f' ->
     `Assoc [ ("type", `String "Not");
              ("formula", to_yojson_aux f') ]
@@ -78,27 +77,25 @@ let rec of_yojson (json : Yojson.Safe.t) : (t, string) result =
         Ok True
       | "False" ->
         Ok False
-      | "Predicate" ->
-        let name = member "name" json |> json_to_string in
-        let args = member "args" json |> to_list |> List.map Expr.abs_of_yojson |> sequence_results in
-        (match args with
-        | Error m -> Error m
-        | Ok args ->  Ok (Predicate (name, args)))
+      | "Pred" ->
+        (match Qpred.of_yojson (member "pred" json) with
+         | Ok p -> Ok (Pred p)
+         | Error e -> Error e)
       | "Not" ->
         let f = member "formula" json |> of_yojson in
         (match f with
-          | Ok f -> Ok (Not f)
-          | Error m -> Error m)
+        | Ok f -> Ok (Not f)
+        | Error m -> Error m)
       | "And" ->
         let fs = member "formulas" json |> to_list |> List.map of_yojson |> sequence_results in
         (match fs with
-          | Ok fs -> Ok (And fs)
-          | Error m -> Error m)
+        | Ok fs -> Ok (And fs)
+        | Error m -> Error m)
       | "Or" ->
         let fs = member "formulas" json |> to_list |> List.map of_yojson |> sequence_results in
         (match fs with
-          | Ok fs -> Ok (Or fs)
-          | Error m -> Error m)
+        | Ok fs -> Ok (Or fs)
+        | Error m -> Error m)
       | s ->
         Error ("Unknown formula type: " ^ s))
     | _ ->

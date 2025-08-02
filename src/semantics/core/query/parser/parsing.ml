@@ -15,8 +15,8 @@
  *)
 
 open Prelude
-open TcpgBase
-open TcpgSyntax
+open SecCheckJSBase
+open SecCheckJSSyntax
 include Parsing_utils
 
 type 'a start = Lexing.position -> 'a Parser.MenhirInterpreter.checkpoint

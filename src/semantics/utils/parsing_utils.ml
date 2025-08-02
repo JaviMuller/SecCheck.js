@@ -15,8 +15,8 @@
  *)
 
 open Prelude
-open TcpgBase
-open TcpgSyntax
+open SecCheckJSBase
+open SecCheckJSSyntax
 
 let load_file code ?(file : string option) (path : string) : string =
   let file' = Option.value ~default:path file in

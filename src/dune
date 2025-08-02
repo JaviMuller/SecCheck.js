@@ -1,8 +1,8 @@
 (include_subdirs unqualified)
 
 (library
-  (public_name trusted-cpg)
-  (name trusted_cpg)
+  (public_name sec-check-js)
+  (name sec_check_js)
   (flags
     (:standard -open Prelude))
-  (libraries TcpgBase TcpgSyntax TcpgSemantics))
+  (libraries SecCheckJSBase SecCheckJSSyntax SecCheckJSSemantics))

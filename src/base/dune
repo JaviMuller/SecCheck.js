@@ -1,8 +1,8 @@
 (include_subdirs unqualified)
 
 (library
- (public_name trusted-cpg.base)
- (name TcpgBase)
+ (public_name sec-check-js.base)
+ (name SecCheckJSBase)
  (modules base cont font log io string terminal)
  (libraries fmt prelude unix)
  (instrumentation

@@ -1,4 +1,4 @@
-open TcpgSyntax
+open SecCheckJSSyntax
 
 module VarMap = Map.Make (String)
 module StateMap = Map.Make (Int)

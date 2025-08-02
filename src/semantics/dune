@@ -1,8 +1,8 @@
 (include_subdirs unqualified)
 
 (library
-  (public_name trusted-cpg.lib)
-  (name TcpgSemantics)
+  (public_name sec-check-js.lib)
+  (name SecCheckJSSemantics)
   (modules
     ; core
     ; verification
@@ -18,8 +18,8 @@
   (preprocess
     (staged_pps ppx_import ppx_deriving.std))
   (libraries
-    TcpgBase
-    TcpgSyntax
+    SecCheckJSBase
+    SecCheckJSSyntax
     prelude
     menhirLib
     str))

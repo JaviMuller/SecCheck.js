@@ -1,15 +1,15 @@
 (lang dune 3.17)
 
-(map_workspace_root false) ; used for debugging with earlybird
+; (map_workspace_root false) ; used for debugging with earlybird
 
 (using menhir 3.0)
 
-(name trusted-cpg)
+(name sec-check-js)
 
 (generate_opam_files true)
 
 (source
- (github JaviMuller/TrustedCPG))
+ (github JaviMuller/SecCheck.js))
 
 (authors "André Nascimento <email@email.com>"
          "Javier de Muller <javier.muller.santa.maria@gmail.com")
@@ -22,7 +22,7 @@
 (documentation https://url/to/documentation)
 
 (package
- (name trusted-cpg)
+ (name sec-check-js)
  (synopsis "A short synopsis")
  (description "A longer description")
  (depends

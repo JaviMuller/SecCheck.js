@@ -15,8 +15,8 @@
  *)
 
 (*open Prelude*)
-open TcpgBase
-open TcpgSyntax
+open SecCheckJSBase
+open SecCheckJSSyntax
 
 type file = string array
 
