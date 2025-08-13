@@ -13,6 +13,8 @@ let to_string (q : t) : string =
   "  " ^ Trcformula.to_string q.tracef ^ "\n" ^
   "}"
 
+let get_name ({name; _} : t) : string = name
+
 let get_invariant ({invariant; _} : t) : Invformula.t = invariant
 
 let get_trace_formula ({tracef; _} : t) : Trcformula.t = tracef

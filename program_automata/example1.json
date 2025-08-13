@@ -1,0 +1,34 @@
+{                                    
+  "locs": [ "l1", "l2", "l3" ],
+  "preds": {
+    "base_taint": [ "l2" ],
+    "sink": [ "l3" ],
+    "sanitizer": [],
+    "has_value": [ [ "l2", "_" ] ],
+    "has_fun_name" : [ [ "l3", "eval"] ],
+    "depends" : [],
+    "tainted" : [ "l2" ]
+  },
+  "states": 3,
+  "acc_states": [ 3 ],
+  "trace": [
+    {
+      "src": 1,
+      "dest": 2,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l3" ],
+        "args": [ [ "l2" ] ]
+      }
+    },
+    {
+      "src": 2,
+      "dest": 3,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l3" ],
+        "ret": [ "l4" ]
+      }
+    }
+  ]
+}

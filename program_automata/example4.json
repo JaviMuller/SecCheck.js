@@ -1,0 +1,51 @@
+{                                    
+  "locs": [ "l1", "l2", "l3", "l4", "l5", "l6" ],
+  "preds": {
+    "base_taint": [ "l2", "l3", "l4" ],
+    "sink": [],
+    "sanitizer": [],
+    "has_value": [
+      [ "l2", "*" ],
+      [ "l3", "*" ],
+      [ "l4", "*" ],
+      [ "l6", "*" ]
+    ],
+    "has_fun_name": [],
+    "depends": [],
+    "tainted": [ "l2", "l3", "l4" ]
+  },
+  "states": 2,
+  "acc_states": [ 1 ],
+  "trace": [
+    {
+      "src": 1,
+      "dest": 2,
+      "lbl": {
+        "type": "PropLookup",
+        "target": [ "l3" ],
+        "object": [ "l3" ],
+        "property": [ "l6" ]
+      }
+    },
+    {
+      "src": 2,
+      "dest": 1,
+      "lbl": {
+        "type": "PropLookup",
+        "target": [ "l2" ],
+        "object": [ "l2" ],
+        "property": [ "l3" ]
+      }
+    },
+    {
+      "src": 2,
+      "dest": 1,
+      "lbl": {
+        "type": "PropAssign",
+        "object": [ "l2", "l5" ],
+        "property": [ "l3" ],
+        "value": [ "l4" ]
+      }
+    }
+  ]
+}

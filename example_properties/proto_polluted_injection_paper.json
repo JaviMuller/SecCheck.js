@@ -1,0 +1,84 @@
+{
+  "prop_name": "PrototypePollutionExploited",
+  "states": 6,
+  "init_state": 0,
+  "acc_states": [ 5 ],
+  "transitions": [
+    {
+      "src": 4,
+      "dest": 5,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": { "type": "Variable", "value": "f" },
+        "args": [
+          { "type": "Variable", "value": "v2" },
+          { "type": "UnnamedVariable" },
+          { "type": "UnnamedVariable" }
+        ]
+      }
+    },
+    { "src": 4, "dest": 4, "lbl": { "type": "Any" } },
+    {
+      "src": 1,
+      "dest": 2,
+      "lbl": {
+        "type": "PropLookup",
+        "target": { "type": "Variable", "value": "o2" },
+        "object": { "type": "Variable", "value": "o1" },
+        "property": { "type": "Variable", "value": "p" }
+      }
+    },
+    { "src": 1, "dest": 1, "lbl": { "type": "Any" } },
+    { "src": 5, "dest": 5, "lbl": { "type": "Any" } },
+    {
+      "src": 3,
+      "dest": 4,
+      "lbl": {
+        "type": "PropLookup",
+        "target": { "type": "Variable", "value": "v1" },
+        "object": { "type": "Variable", "value": "o3" },
+        "property": { "type": "Variable", "value": "q2" }
+      }
+    },
+    { "src": 3, "dest": 3, "lbl": { "type": "Any" } },
+    { "src": 0, "dest": 1, "lbl": { "type": "Any" } },
+    {
+      "src": 2,
+      "dest": 3,
+      "lbl": {
+        "type": "PropAssign",
+        "object": { "type": "Variable", "value": "o2" },
+        "property": { "type": "Variable", "value": "q1" },
+        "value": { "type": "Variable", "value": "v1" }
+      }
+    },
+    { "src": 2, "dest": 2, "lbl": { "type": "Any" } }
+  ],
+  "invariant": {
+    "type": "And",
+    "formulas": [
+      {
+        "type": "Pred",
+        "pred": { "type": "HasValue", "var": "p", "value": "__proto__" }
+      },
+      { "type": "Pred", "pred": { "type": "Tainted", "var": "q1" } },
+      { "type": "Pred", "pred": { "type": "Tainted", "var": "v1" } },
+      {
+        "type": "Pred",
+        "pred": { "type": "SameValue", "var1": "q1", "var2": "q2" }
+      },
+      {
+        "type": "Pred",
+        "pred": { "type": "Depends", "var1": "v2", "var2": "v1" }
+      },
+      {
+        "type": "Pred",
+        "pred": {
+          "type": "HasFunName",
+          "var": "f",
+          "name": "child_process.exec"
+        }
+      }
+    ]
+  }
+}

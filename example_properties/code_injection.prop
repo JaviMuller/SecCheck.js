@@ -1,6 +1,6 @@
 Prop CodeInjection(f, arg) {
   tainted(arg) /\
-  injection_sink(f)
+  sink(f)
   ;
-  f(arg)
+  F (f(arg))
 }

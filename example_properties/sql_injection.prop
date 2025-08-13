@@ -1,5 +1,5 @@
 Prop SqlInjection (f, v) {
-  tainted(v) /\ fun_name(f, "sql_execute")
+  tainted(v) /\ has_fun_name(f, "sql_execute")
   ;
-  f(_, _, v)
+  F(f(_, _, v))
 }

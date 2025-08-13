@@ -113,7 +113,7 @@ let pred_target :=
     { Qpred.Sanitizer v }
   | HAS_VALUE; LPAREN; x = id_target; COMMA; v = val_target; RPAREN;
     { Qpred.HasValue (x, v) }
-  | HAS_FUN_NAME; LPAREN; f = id_target; COMMA; name = name_target; RPAREN;
+  | HAS_FUN_NAME; LPAREN; f = id_target; COMMA; name = fun_name; RPAREN;
     { Qpred.HasFunName (f, name) }
   | DEPENDS; LPAREN; v1 = id_target; COMMA; v2 = id_target; RPAREN;
     { Qpred.Depends (v1, v2) }
@@ -216,3 +216,5 @@ let id_target :=
   | UNDERSCORE; { Qvar.UVar }
   | x = ID; { check_variable x; Qvar.Var x }
 let name_target := x = ID; { x }
+
+let fun_name := s = STRING; { s }

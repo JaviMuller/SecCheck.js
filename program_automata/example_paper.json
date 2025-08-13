@@ -1,0 +1,333 @@
+{                                    
+  "locs": [
+    "l1",
+    "l2",
+    "l3",
+    "l4",
+    "l5",
+    "l6",
+    "l7",
+    "l8",
+    "l9",
+    "l10",
+    "l11",
+    "l12",
+    "l13",
+    "l14",
+    "l15",
+    "l16",
+    "l17",
+    "l18",
+    "l19",
+    "l20",
+    "l21",
+    "l22",
+    "l23",
+    "l24",
+    "l25",
+    "l26",
+    "l27",
+    "l28" ],
+  "preds": {
+    "base_taint": [ "l12", "l15" ],
+    "sink": [ "l2" ],
+    "sanitizer": [ "l1" ],
+    "has_value": [
+      [ "l4" , "*" ],
+      [ "l5" , "options" ],
+      [ "l6" , "defaults" ],
+      [ "l9" , "*" ],
+      [ "l10", "*" ],
+      [ "l11", "*" ],
+      [ "l12", "*" ],
+      [ "l13", "keys" ],
+      [ "l14", "*" ],
+      [ "l15", "_" ],
+      [ "l16", "*" ],
+      [ "l17", "shell" ],
+      [ "l18", "bash -c" ],
+      [ "l19", "_" ],
+      [ "l20", "_" ],
+      [ "l22", "*" ],
+      [ "l23", "_" ],
+      [ "l24", "_" ],
+      [ "l26", -1 ],
+      [ "l27", 0 ]
+    ],
+    "has_fun_name" : [
+      [ "l1", "shell-escape" ],
+      [ "l2", "child_process.exec" ],
+      [ "l3", "merge" ],
+      [ "l7", "Git.constructor" ],
+      [ "l8", "Git.commit" ],
+      [ "l21", "__cb_1" ],
+      [ "l25", "console.log" ]
+    ],
+    "depends" : [
+      [ "l9" , "l4" ],
+      [ "l14", "l12" ],
+      [ "l19", "l15" ],
+      [ "l20", "l12" ],
+      [ "l20", "l18" ],
+      [ "l20", "l19" ]
+    ],
+    "tainted" : [ "l12", "l14", "l15", "l19", "l20" ]
+  },
+  "states": 23,
+  "acc_states": [ 23 ],
+  "trace": [
+    {
+      "src": 1,
+      "dest": 2,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l7" ],
+        "args": []
+      }
+    },
+    {
+      "src": 2,
+      "dest": 3,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l7" ],
+        "ret": [ "l9" ]
+      }
+    },
+    {
+      "src": 3,
+      "dest": 4,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l8" ],
+        "args": [ [ "l15" ], [ "l12" ] ]
+      }
+    },
+    {
+      "src": 4,
+      "dest": 5,
+      "lbl": {
+        "type": "PropLookup",
+        "target": [ "l11" ],
+        "object": [ "l9" ],
+        "property": [ "l6" ]
+      }
+    },
+    {
+      "src": 5,
+      "dest": 6,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l3" ],
+        "args": [ [ "l11" ], [ "l12" ] ]
+      }
+    },
+    {
+      "src": 6,
+      "dest": 7,
+      "lbl": {
+        "type": "PropLookup",
+        "target": [ "l14" ],
+        "object": [ "l12", "l16" ],
+        "property": [ "l13" ]
+      }
+    },
+    {
+      "src": 7,
+      "dest": 8,
+      "lbl": {
+        "type": "PropLookup",
+        "target": [ "l12", "l16" ],
+        "object": [ "l12", "l16" ],
+        "property": [ "l14" ]
+      }
+    },
+    {
+      "src": 8,
+      "dest": 9,
+      "lbl": {
+        "type": "PropLookup",
+        "target": [ "l11", "l12", "l16" ],
+        "object": [ "l11", "l12", "l16" ],
+        "property": [ "l14" ]
+      }
+    },
+    {
+      "src": 9,
+      "dest": 9,
+      "lbl": {
+        "type": "PropAssign",
+        "object": [ "l11", "l12", "l16" ],
+        "property": [ "l14" ],
+        "value": [ "l16" ]
+      }
+    },
+    {
+      "src": 9,
+      "dest": 10,
+      "lbl": {
+        "type": "PropLookup",
+        "target": [ "l11", "l12", "l16" ],
+        "object": [ "l11", "l12", "l16" ],
+        "property": [ "l14" ]
+      }
+    },
+    {
+      "src": 10,
+      "dest": 11,
+      "lbl": {
+        "type": "PropLookup",
+        "target": [ "l12", "l16" ],
+        "object": [ "l12", "l16" ],
+        "property": [ "l14" ]
+      }
+    },
+    {
+      "src": 11,
+      "dest": 6,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l3" ],
+        "args": [ [ "l11", "l12", "l16" ], [ "l12", "l16" ] ]
+      }
+    },
+    {
+      "src": 7,
+      "dest": 6,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l7" ],
+        "ret": [ "l11", "l12", "l16" ]
+      }
+    },
+    {
+      "src": 7,
+      "dest": 13,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l7" ],
+        "ret": [ "l11", "l12", "l16" ]
+      }
+    },
+    {
+      "src": 8,
+      "dest": 6,
+      "lbl": {
+        "type": "PropAssign",
+        "object": [ "l11", "l12", "l16" ],
+        "property": [ "l14" ],
+        "value": [ "l12", "l16" ]
+      }
+    },
+    {
+      "src": 12,
+      "dest": 13,
+      "lbl": {
+        "type": "PropLookup",
+        "target": [ "l10" ],
+        "object": [ "l9" ],
+        "property": [ "l5" ]
+      }
+    },
+    {
+      "src": 13,
+      "dest": 14,
+      "lbl": {
+        "type": "PropLookup",
+        "target": [ "l12" ],
+        "object": [ "l10" ],
+        "property": [ "l17" ]
+      }
+    },
+    {
+      "src": 14,
+      "dest": 15,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l1" ],
+        "args": [ [ "l15" ] ]
+      }
+    },
+    {
+      "src": 15,
+      "dest": 16,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l1" ],
+        "ret": [ "l19" ]
+      }
+    },
+    {
+      "src": 16,
+      "dest": 17,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l2" ],
+        "args": [ [ "l20" ], [ "l11", "l12", "l16" ], [ "l21" ] ]
+      }
+    },
+    {
+      "src": 17,
+      "dest": 18,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l2" ],
+        "ret": [ "l22" ]
+      }
+    },
+    {
+      "src": 18,
+      "dest": 19,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l21" ],
+        "args": [ [ "l23" ], [ "l24" ] ]
+      }
+    },
+    {
+      "src": 19,
+      "dest": 20,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l25" ],
+        "args": [ [ "l23" ] ]
+      }
+    },
+    {
+      "src": 20,
+      "dest": 21,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l25" ],
+        "ret": [ "l28" ]
+      }
+    },
+    {
+      "src": 21,
+      "dest": 22,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l21" ],
+        "ret": [ "l26" ]
+      }
+    },
+    {
+      "src": 19,
+      "dest": 22,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l21" ],
+        "ret": [ "l27" ]
+      }
+    },
+    {
+      "src": 22,
+      "dest": 23,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l8" ],
+        "ret": [ "l28" ]
+      }
+    }
+  ]
+}

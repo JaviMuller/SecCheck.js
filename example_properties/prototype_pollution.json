@@ -1,0 +1,43 @@
+{
+  "prop_name": "PrototypePollution",
+  "states": 4,
+  "init_state": 0,
+  "acc_states": [ 3 ],
+  "transitions": [
+    {
+      "src": 1,
+      "dest": 2,
+      "lbl": {
+        "type": "PropLookup",
+        "target": { "type": "Variable", "value": "o2" },
+        "object": { "type": "Variable", "value": "o1" },
+        "property": { "type": "Variable", "value": "p" }
+      }
+    },
+    { "src": 1, "dest": 1, "lbl": { "type": "Any" } },
+    { "src": 3, "dest": 3, "lbl": { "type": "Any" } },
+    { "src": 0, "dest": 1, "lbl": { "type": "Any" } },
+    {
+      "src": 2,
+      "dest": 3,
+      "lbl": {
+        "type": "PropAssign",
+        "object": { "type": "Variable", "value": "o2" },
+        "property": { "type": "Variable", "value": "q1" },
+        "value": { "type": "Variable", "value": "v" }
+      }
+    },
+    { "src": 2, "dest": 2, "lbl": { "type": "Any" } }
+  ],
+  "invariant": {
+    "type": "And",
+    "formulas": [
+      {
+        "type": "Pred",
+        "pred": { "type": "HasValue", "var": "p", "value": "__proto__" }
+      },
+      { "type": "Pred", "pred": { "type": "Tainted", "var": "q1" } },
+      { "type": "Pred", "pred": { "type": "Tainted", "var": "v" } }
+    ]
+  }
+}

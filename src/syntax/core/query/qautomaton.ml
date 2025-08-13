@@ -7,7 +7,11 @@ type t =
     init_state   : int;
     acc_states   : int list;
     transitions  : (int, Qtransition.t list) Hashtbl.t;
+    invariant    : Invformula.t;
   }
+
+let get_invariant (q : t) : Invformula.t =
+  q.invariant
 
 let sequence_results (results: ('a, string) result list) : ('a list, string) result =
   let rec aux acc = function
@@ -16,26 +20,13 @@ let sequence_results (results: ('a, string) result list) : ('a list, string) res
   | (Error m) :: _ -> Error m in
   aux [] results
   
-let get_prop_name ({ prop_name; _ } : t) : string =
-  prop_name
-
-let get_states ({ states; _ } : t) : int =
-  states
-
-let get_init_state ({ init_state; _ } : t) : int =
-  init_state
-
-let get_acc_states ({ acc_states; _ } : t) : int list =
-  acc_states
-
 let is_acc_state ({ acc_states; _ } : t) (s : int) : bool =
   List.mem s acc_states
 
-let get_transitions ({ transitions; _ } : t) : (int, Qtransition.t list) Hashtbl.t =
-  transitions
-
-let get_applicable_trs ({ transitions; _ } : t) (s : int) : Qtransition.t list option=
-  Hashtbl.find_opt transitions s
+let state_transitions ({ transitions; _ } : t) (s : int) : Qtransition.t list =
+  match Hashtbl.find_opt transitions s with
+  | Some trs -> trs
+  | None -> []
 
 let load_file_contents (f: string) : string =
   let ic = open_in f in
@@ -46,7 +37,7 @@ let load_file_contents (f: string) : string =
   Bytes.to_string s
 
 
-let of_ltlf2dfa (name : string) (subst : (string, Qaction.t) Hashtbl.t) (json: Yojson.Safe.t) : (t, string) result =
+let of_ltlf2dfa (name : string) (inv : Invformula.t) (subst : (string, Qaction.t) Hashtbl.t) (json: Yojson.Safe.t) : (t, string) result =
   let transition_of_json (json : Yojson.Safe.t) : (Qtransition.t, string) result =
     try
       match json with
@@ -90,7 +81,8 @@ let of_ltlf2dfa (name : string) (subst : (string, Qaction.t) Hashtbl.t) (json: Y
            states = num_states;
            init_state = init_state;
            acc_states = acc_states;
-           transitions = transition_table
+           transitions = transition_table;
+           invariant = inv;
          }
        | Error e -> Error e
       )
@@ -101,7 +93,8 @@ let of_ltlf2dfa (name : string) (subst : (string, Qaction.t) Hashtbl.t) (json: Y
     | e -> 
       Error ("Unexpected error: " ^ Printexc.to_string e)
 
-let from_trcf ?(name="Vulnerability") (f : Trcformula.t) : (t, string) result =
+let from_qry (q : Query.t) : (t, string) result =
+  let f = Query.get_trace_formula q in
   let lang = match f with
              | FutureFormula _ -> "ltlf"
              | PastFormula _ -> "ppltl" in
@@ -112,7 +105,9 @@ let from_trcf ?(name="Vulnerability") (f : Trcformula.t) : (t, string) result =
             ~stdout:tmp_file ["ltl2dfa.py"; "-l"; lang; "-s"; Trcformula.to_ltlf2dfa subst f] in
   let _ = Sys.command cmd in
   let json_str = load_file_contents(tmp_file) in
-  of_ltlf2dfa name subst @@ Yojson.Safe.from_string json_str
+  let name = Query.get_name q in
+  let invariant = Query.get_invariant q in
+  of_ltlf2dfa name invariant subst @@ Yojson.Safe.from_string json_str
 
 let to_yojson (qa : t) : Yojson.Safe.t =
   `Assoc [ ("prop_name", `String qa.prop_name);
@@ -122,7 +117,8 @@ let to_yojson (qa : t) : Yojson.Safe.t =
            ("transitions", `List (Hashtbl.fold 
                                   (fun _ v acc -> List.append (List.map Qtransition.to_yojson v) 
                                                   acc) 
-                                  qa.transitions [])) ]
+                                  qa.transitions []));
+           ("invariant", Invformula.to_yojson qa.invariant) ]
 
 let of_yojson (json : Yojson.Safe.t) : (t, string) result =
   try
@@ -137,8 +133,9 @@ let of_yojson (json : Yojson.Safe.t) : (t, string) result =
         |> to_list
         |> List.map Qtransition.of_yojson
         |> sequence_results in
-      (match trs_json with
-       | Ok trs ->
+      let invariant = member "invariant" json |> Invformula.of_yojson in
+      (match trs_json, invariant with
+       | Ok trs, Ok inv ->
          List.fold_left (fun _ tr -> 
                           let src = Qtransition.get_src tr in
                           match Hashtbl.find_opt transitions src with
@@ -150,9 +147,10 @@ let of_yojson (json : Yojson.Safe.t) : (t, string) result =
          states      = states;
          init_state  = init_state;
          acc_states  = acc_states;
-         transitions = transitions
+         transitions = transitions;
+         invariant   = inv;
        }
-      | Error e -> Error e)
+      | Error e, _ | _, Error e -> Error e)
     | _ ->
       Error "Expected a JSON object at the top level"
   with

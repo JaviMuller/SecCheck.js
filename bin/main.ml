@@ -1,19 +1,47 @@
 open SecCheckJSSyntax
 open Stdlib
 
+(* let get_query_json (q: Query.t) = 
+  let qautom = Qautomaton.from_qry q in
+  match qautom with
+  | Ok q ->
+    print_endline @@ Yojson.Safe.pretty_to_string @@ Qautomaton.to_yojson q
+  | Error e -> failwith e *)
+
+let cartesian_product (l1 : 'a list) (l2 : 'b list) : ('a * 'b) list =
+  List.concat @@ List.map (fun e1 -> List.map (fun e2 -> (e1, e2)) l2) l1
+
 let () = 
   if Array.length Sys.argv <> 3 then
     print_endline "Usage: dune exec trusted-cpg <program_json> <query_file>"
   else
-    (* let program_ic = open_in Sys.argv.(1) in
+    let program_ic = open_in Sys.argv.(1) in
     let program_json = In_channel.input_all program_ic in
-    let program = Program.of_yojson @@ Yojson.Safe.from_string program_json in *)
+    let pautom = Pautomaton.of_yojson @@ Yojson.Safe.from_string program_json in
     let query_file = Sys.argv.(2) in
     let query = SecCheckJSSemantics.Parsing.parse_query_from_file query_file in
-    let qautom = Qautomaton.from_trcf query.tracef in
-    match qautom with
-    | Ok qautom -> print_endline @@ Yojson.Safe.pretty_to_string (Qautomaton.to_yojson qautom)
-    | Error e -> print_endline @@ "Error: " ^  e
+    let qautom = Qautomaton.from_qry query in
+    match pautom, qautom with
+    | Ok p, Ok q ->
+      let final_states = SecCheckJSSemantics.Verification.verify q p in
+      (match final_states with
+       | [] -> print_endline "No violationss were found!"
+       | _  -> print_endline "Violations were found!";
+               List.iter (fun s ->
+                 let bindings = SecCheckJSSemantics.Verification.get_bindings s in
+                 print_endline "Exploit: {";
+                 print_string @@ SecCheckJSSemantics.Verification.bindings_to_string bindings;
+                 print_endline "}";
+                 print_endline "Traces: ";
+                 let q_trc = List.rev s.q_trans in
+                 let p_trc = List.rev s.p_trans in
+                 let trcs = cartesian_product q_trc p_trc in
+                 let _ = List.mapi (fun i (q_t, p_t) ->
+                   print_endline @@ (string_of_int i) ^ ":";
+                   print_endline @@ "  q: " ^ (Qtransition.to_string q_t);
+                   print_endline @@ "  p: " ^ (Ptransition.to_string p_t)) trcs in
+                 print_newline ()) final_states)
+    | Error m, _ | _, Error m -> print_endline m
     (* match program with
     | Ok (p) ->
       let final_states = TcpgSemantics.Verification.verify query p in

@@ -1,0 +1,27 @@
+{
+  "prop_name": "CodeInjection",
+  "states": 3,
+  "init_state": 0,
+  "acc_states": [ 2 ],
+  "transitions": [
+    {
+      "src": 1,
+      "dest": 2,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": { "type": "Variable", "value": "f" },
+        "args": [ { "type": "Variable", "value": "arg" } ]
+      }
+    },
+    { "src": 1, "dest": 1, "lbl": { "type": "Any" } },
+    { "src": 0, "dest": 1, "lbl": { "type": "Any" } },
+    { "src": 2, "dest": 2, "lbl": { "type": "Any" } }
+  ],
+  "invariant": {
+    "type": "And",
+    "formulas": [
+      { "type": "Pred", "pred": { "type": "Tainted", "var": "arg" } },
+      { "type": "Pred", "pred": { "type": "Sink", "var": "f" } }
+    ]
+  }
+}

@@ -4,6 +4,7 @@ type t =
   | FuncCall        of (Qvar.t * Qvar.t list)
   | FuncCallWithArg of (Qvar.t * Qvar.t)
   | FuncCallAnyArgs of Qvar.t
+  | FuncRet         of (Qvar.t * Qvar.t)
   | PropAssign      of (Qvar.t * Qvar.t * Qvar.t)
   | PropLookup      of (Qvar.t * Qvar.t * Qvar.t)
   | Any
@@ -17,6 +18,8 @@ let to_string (a : t) : string =
     (qv_str callee) ^ "(..." ^ (qv_str arg) ^ ")"
   | FuncCallAnyArgs (callee) ->
     (qv_str callee) ^ "(...)"
+  | FuncRet (callee, ret) ->
+    (qv_str callee) ^ " -> " ^ (qv_str ret)
   | PropAssign (obj, prop, v) ->
     (qv_str obj) ^ "[" ^ (qv_str prop) ^ "]" ^ " := " ^ (qv_str v)
   | PropLookup (var, obj, prop) ->
@@ -38,6 +41,10 @@ let to_yojson (a : t) : Yojson.Safe.t =
   | FuncCallAnyArgs callee ->
     `Assoc [ ("type", `String "FuncCallAnyArgs");
              ("callee", qv_json callee) ]
+  | FuncRet (callee, ret) ->
+    `Assoc [ ("type", `String "FuncRet");
+             ("callee", qv_json callee);
+             ("ret", qv_json ret) ]
   | PropAssign (obj, prop, v) ->
     `Assoc [ ("type", `String "PropAssign");
              ("object", qv_json obj);
@@ -87,6 +94,13 @@ let of_yojson (json : Yojson.Safe.t) : (t, string) result =
           | Ok callee ->
             Ok (FuncCallAnyArgs callee)
           | Error e -> Error e)
+        | "FuncRet" ->
+          let callee = member "callee" json |> qv_of_json in
+          let ret = member "ret" json |> qv_of_json in
+          (match callee, ret with
+           | Ok callee, Ok ret ->
+             Ok (FuncRet (callee, ret))
+           | Error e, _ | _, Error e -> Error e)
         | "PropAssign" ->
           let obj = member "object" json |> qv_of_json in
           let prop = member "property" json |> qv_of_json in

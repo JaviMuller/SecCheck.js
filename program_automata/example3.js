@@ -6,3 +6,17 @@ function f(x, y) {
   eval(x);
   eval(y);
 }
+
+module.exports = f
+
+/*
+l1 -> f
+l2 -> x
+l3 -> y
+l4 -> console.log
+l5 -> eval
+l6 -> __ret_aux_1_x
+l7 -> __ret_aux_1_y
+l8 -> __ret_eval_x
+l9 -> __ret_eval_y
+*/

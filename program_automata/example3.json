@@ -1,0 +1,94 @@
+{                                    
+  "locs": [ "l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9" ],
+  "preds": {
+    "base_taint": [ "l2", "l3" ],
+    "sink": [ "l5" ],
+    "sanitizer": [],
+    "has_value": [
+      [ "l2", "*" ],
+      [ "l3", "*" ]
+    ],
+    "has_fun_name": [
+      [ "l4", "console.log" ],
+      [ "l5", "eval" ]
+    ],
+    "depends": [],
+    "tainted": [ "l2", "l3" ]
+  },
+  "states": 9,
+  "acc_states": [ 9 ],
+  "trace": [
+    {
+      "src": 1,
+      "dest": 2,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l4" ],
+        "args": [ [ "l2" ] ]
+      }
+    },
+    {
+      "src": 2,
+      "dest": 3,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l4" ],
+        "ret": [ "l6" ]
+      }
+    },
+    {
+      "src": 3,
+      "dest": 4,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l4" ],
+        "args": [ [ "l3" ] ]
+      }
+    },
+    {
+      "src": 4,
+      "dest": 5,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l4" ],
+        "ret": [ "l7" ]
+      }
+    },
+    {
+      "src": 5,
+      "dest": 6,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l5" ],
+        "args": [ [ "l2" ] ]
+      }
+    },
+    {
+      "src": 6,
+      "dest": 7,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l5" ],
+        "ret": [ "l8" ]
+      }
+    },
+    {
+      "src": 7,
+      "dest": 8,
+      "lbl": {
+        "type": "FuncCall",
+        "callee": [ "l5" ],
+        "args": [ [ "l3" ] ]
+      }
+    },
+    {
+      "src": 8,
+      "dest": 9,
+      "lbl": {
+        "type": "FuncRet",
+        "callee": [ "l5" ],
+        "ret": [ "l9" ]
+      }
+    }
+  ]
+}
