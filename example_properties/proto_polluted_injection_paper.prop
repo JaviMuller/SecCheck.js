@@ -1,13 +1,13 @@
-Prop PrototypePollutionExploited(o1, o2, o3, p, q1, q2, v1, v2, f) {
+Prop PrototypePollutionExploited(o1, o2, o3, p, q1, q2, v1, v2, v3, f) {
   has_value(p, "__proto__") /\
   tainted(q1) /\
   tainted(v1)  /\
   same_value(q1, q2) /\
-  depends(v2, v1) /\
+  depends(v3, v2) /\
   has_fun_name(f, "child_process.exec")
   ;
   o2 := o1[p],
   o2[q1] := v1,
-  v1 := o3[q2],
-  f(v2, _, _)
+  v2 := o3[q2],
+  f(v3, _, _)
 }

@@ -7,7 +7,7 @@ end)
 
 module ProgressSet = Set.Make (struct
   type t = int * int
-  let compare = compare 
+  let compare = compare
 end)
 
 let cartesian_product_list (lists : 'a list list) : 'a list list =
@@ -93,14 +93,14 @@ let unify_aux (bindings : Ploc.t VarMap.t) (vars: Qvar.t list) (locs : Ploc.t li
 let unify (bindings : Ploc.t VarMap.t) (q_action : Qaction.t) (p_action : Paction.t) : Ploc.t VarMap.t list =
   match q_action, p_action with
   | FuncCall (nameq, argsq), FuncCall (namep, argsp) ->
-    unify_aux bindings (nameq :: argsq) (namep :: argsp)
+    unify_aux bindings (nameq :: argsq) ([namep] :: argsp)
   | FuncCallWithArg (nameq, argq), FuncCall(namep, argsp) ->
     let locs_all_args = List.sort_uniq compare @@ List.concat argsp in
-    unify_aux bindings [nameq; argq] [namep; locs_all_args]
+    unify_aux bindings [nameq; argq] [[namep]; locs_all_args]
   | FuncCallAnyArgs nameq, FuncCall(namep, _) ->
-    unify_aux bindings [nameq] [namep]
+    unify_aux bindings [nameq] [[namep]]
   | FuncRet (calleeq, retq), FuncRet (calleep, retp) ->
-    unify_aux bindings [calleeq; retq] [calleep; retp]
+    unify_aux bindings [calleeq; retq] [[calleep]; retp]
   | PropAssign (objq, propq, vq), PropAssign (objp, propp, vp) ->
     unify_aux bindings [objq; propq; vq] [objp; propp; vp]
   | PropLookup (varq, objq, propq), PropLookup (varp, objp, propp) ->
@@ -206,7 +206,8 @@ let analyze_transition (s : state) (q_trans : Qtransition.t) (p_trans : Ptransit
   let p_action = Ptransition.get_lbl p_trans in
   (* is_progress*)
   if ProgressSet.mem (new_q_state, new_p_state) s.progress
-    then []
+    then 
+      []
     else
       let new_progress = ProgressSet.add (new_q_state, new_p_state) s.progress in
       (* can_bind *)

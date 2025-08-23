@@ -240,7 +240,7 @@ let of_yojson (json : Yojson.Safe.t) : (t, string) result =
           else
             Hashtbl.add acc t.src [t];
           acc
-        | Error e -> failwith(e)) (Hashtbl.create 1000) trace_json in
+        | Error e -> failwith(e)) (Hashtbl.create 500) trace_json in
       Ok { locs; preds; states; acc_states; trace }
     | _ -> Error "Invalid JSON format"
   with

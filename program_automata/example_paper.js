@@ -80,3 +80,12 @@ l26 -> n_-1
 l27 -> n_0
 */
 
+/*
+l1 -> f_Git.commit
+l2 -> message
+l3 -> gitConfig
+l4 -> f_merge
+l5 -> git.defaults
+l6 -> Object.keys(gitConfig)
+l7 -> {} @ 8
+*/

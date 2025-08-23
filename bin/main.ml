@@ -8,9 +8,6 @@ open Stdlib
     print_endline @@ Yojson.Safe.pretty_to_string @@ Qautomaton.to_yojson q
   | Error e -> failwith e *)
 
-let cartesian_product (l1 : 'a list) (l2 : 'b list) : ('a * 'b) list =
-  List.concat @@ List.map (fun e1 -> List.map (fun e2 -> (e1, e2)) l2) l1
-
 let () = 
   if Array.length Sys.argv <> 3 then
     print_endline "Usage: dune exec trusted-cpg <program_json> <query_file>"
@@ -35,7 +32,7 @@ let () =
                  print_endline "Traces: ";
                  let q_trc = List.rev s.q_trans in
                  let p_trc = List.rev s.p_trans in
-                 let trcs = cartesian_product q_trc p_trc in
+                 let trcs = List.combine q_trc p_trc in
                  let _ = List.mapi (fun i (q_t, p_t) ->
                    print_endline @@ (string_of_int i) ^ ":";
                    print_endline @@ "  q: " ^ (Qtransition.to_string q_t);

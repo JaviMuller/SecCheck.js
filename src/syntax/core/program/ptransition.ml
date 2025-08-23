@@ -15,3 +15,18 @@ let get_dest (tr : t) : int =
 
 let get_lbl (tr : t) : Paction.t =
   tr.lbl
+
+type eps = {
+  src  : int;
+  dest : int;
+  lbl  : Paction.eps;
+}[@@deriving yojson]
+
+let eps_get_src (tr : eps) : int =
+  tr.src
+
+let eps_get_dest (tr : eps) : int =
+  tr.dest
+
+let eps_get_lbl (tr: eps) : Paction.eps =
+  tr.lbl

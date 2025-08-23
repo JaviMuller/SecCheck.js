@@ -13,6 +13,7 @@
     ploc
     ppred
     paction
+    ptrace
     ptransition
     pautomaton
     ; query

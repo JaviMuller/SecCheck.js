@@ -1,8 +1,8 @@
 open Yojson.Safe.Util
 
-type t = 
-  | FuncCall        of (Ploc.t list * Ploc.t list list)
-  | FuncRet         of (Ploc.t list * Ploc.t list)
+type t =
+  | FuncCall        of (Ploc.t * Ploc.t list list)
+  | FuncRet         of (Ploc.t * Ploc.t list)
   | PropAssign      of (Ploc.t list * Ploc.t list * Ploc.t list)
   | PropLookup      of (Ploc.t list * Ploc.t list * Ploc.t list)
 
@@ -10,11 +10,11 @@ let to_string (a : t) : string =
   let locs_str = List.map Ploc.to_string in
   match a with
   | FuncCall (name, args) -> 
-    let callee = "{" ^ String.concat ", " (locs_str name) ^ "}" in
+    let callee = Ploc.to_string name in
     let args = List.map (fun x -> "{" ^ String.concat ", " (locs_str x) ^ "}") args in
     callee ^ "(" ^ String.concat ", " args ^ ")"
   | FuncRet  (name, ret) ->
-    let callee = "{" ^ String.concat ", " (locs_str name) ^ "}" in
+    let callee = Ploc.to_string name in
     let ret = "{" ^ String.concat ", " (locs_str ret) ^ "}" in
     callee ^ " -> " ^ ret
   | PropAssign (obj, prop, v) ->
@@ -33,13 +33,13 @@ let to_yojson (a : t) : Yojson.Safe.t =
   match a with
   | FuncCall (name, args) ->
     `Assoc [ ("type", `String "FuncCall");
-             ("callee", `List (List.map loc_to_json_string name));
+             ("callee", loc_to_json_string name);
              ("args", `List (List.map 
                               (fun arg -> `List (List.map loc_to_json_string arg))
                               args)) ]
   | FuncRet (name, ret) ->
     `Assoc [ ("type", `String "FuncRet");
-             ("callee", `List (List.map loc_to_json_string name));
+             ("callee", loc_to_json_string name);
              ("ret", `List (List.map loc_to_json_string ret)) ]
   | PropAssign (obj, prop, value) ->
     `Assoc [ ("type", `String "PropAssign");
@@ -62,11 +62,11 @@ let of_yojson (json : Yojson.Safe.t) : (t, string) result =
       (
         match action_type with
         | "FuncCall" ->
-          let callee = member "callee" json |> to_list |> List.map json_to_loc in
+          let callee = member "callee" json |> json_to_loc in
           let args = member "args" json |> to_list |> List.map to_list |> List.map @@ List.map json_to_loc in
           Ok (FuncCall (callee, args))
         | "FuncRet" ->
-          let callee = member "callee" json |> to_list |> List.map json_to_loc in
+          let callee = member "callee" json |> json_to_loc in
           let ret = member "ret" json |> to_list |> List.map json_to_loc in
           Ok (FuncRet (callee, ret))
         | "PropAssign" ->
@@ -89,3 +89,34 @@ let of_yojson (json : Yojson.Safe.t) : (t, string) result =
   | e ->
     Error ("Unexpected error: " ^ Printexc.to_string e)
     
+type eps =
+  | Epsilon
+  | Action of t
+
+let eps_to_yojson (a : eps) : Yojson.Safe.t =
+  match a with
+  | Epsilon ->
+    `Assoc [ ("type", `String "Epsilon") ]
+  | Action a ->
+    to_yojson a
+
+let eps_of_yojson (json : Yojson.Safe.t) : (eps, string) result =
+  let json_to_string = Yojson.Safe.Util.to_string in
+  try
+    match json with
+    | `Assoc _ ->
+      let action_type = member "type" json |> json_to_string in
+      (match action_type, of_yojson json with
+       | "Epsilon", _ ->
+         Ok Epsilon
+       | _, Ok a ->
+         Ok (Action a)
+       | _, Error e ->
+         Error e)
+    | _ ->
+      Error "Expected a JSON object at the top level"
+  with
+  | Type_error (msg, _) ->
+    Error ("Type error during parsing: " ^ msg)
+  | e ->
+    Error ("Unexpected error: " ^ Printexc.to_string e)
